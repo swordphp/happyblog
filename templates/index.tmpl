@@ -1,0 +1,99 @@
+{{define "index"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>{{.title}}</title>
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+          crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <link href="/assets/style.css" rel="stylesheet">
+</head>
+
+<body class="fix-header fix-sidebar card-no-border min-width">
+<header class="container-fluid header">
+    <row class="col-md-2">
+        <img height="40" src="https://happyblog-image.ohweb.cn/happyblog/images/aWNvbi5qcG.jpg" alt="..." class="img-rounded">
+    </row>
+    <row class="col-md-8 search-box" style="opacity:0">
+        <form class="form-inline">
+            <div class="form-group">
+                <label class="sr-only" for="exampleInputAmount">Search anything</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </div>
+                    <input style="width:340px" type="text" class="form-control" id="exampleInputAmount" placeholder="{{index .menu "searchph"}}">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">{{index .menu "searchbtn"}}</button>
+        </form>
+    </row>
+    <row class="col-md-2 userinfo">
+        <div class="right-top-menu dropdown">
+            <a id="dLabel" data-target="#" href="#" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                {{index .menu  "welcome"}}-{{.userInfo.NickName }}
+                <span class="caret"></span>
+            </a>
+            <div class="list-group dropdown-menu right-dropdown">
+                <a href="#" class="list-group-item">{{index .menu "myinfo"}}</a>
+                <a href="#" class="list-group-item">{{index .menu "myposts"}}</a>
+                <a href="/admin/logout" class="list-group-item">{{index .menu "logout"}}</a>
+            </div>
+        </div>
+    </row>
+</header>
+<contents class="container-fluid contents">
+    <row class="left-nav">
+        <ul class="nav nav-pills nav-stacked left-nav-ul">
+            <li role="presentation" {{if .welcome}}class="active"{{end}}><a href="/admin/">{{index .menu "dashboard"}}</a></li>
+            <li role="presentation" {{if or .articles .articleEdit}}class="active"{{end}} ><a href="/admin/articles">{{index .menu "articles"}}</a></li>
+            <li role="presentation" {{if .albums}}class="active"{{end}}><a href="/admin/albums">{{index .menu "albums"}}</a></li>
+            <li role="presentation" {{if .tags}}class="active"{{end}}><a href="/admin/tags">{{index .menu "tags"}}</a></li>
+            <li role="presentation" {{if .users}}class="active"{{end}}><a href="/admin/users">{{index .menu "users"}}</a></li>
+{{/*            <li role="presentation"><a href="/admin/logout">{{index .menu "logout"}}</a></li>*/}}
+        </ul>
+    </row>
+    <row class="main-content">
+        {{if .welcome}}
+            {{template "welcome" .}}
+        {{end}}
+        {{if .articles}}
+            {{template "articles" .}}
+        {{end}}
+        {{if .albums}}
+            {{template "albums" .}}
+        {{end}}
+        {{if .tags}}
+            {{template "tags" .}}
+        {{end}}
+        {{if .users}}
+            {{template "users" .}}
+        {{end}}
+        {{if .articleEdit}}
+            {{template "articleedit" .}}
+        {{end}}
+    </row>
+
+</contents>
+<footer class="container-fluid footer">
+     Powered by HappyBlog.
+    Admin Design  &copy; <a style="color:#0000ff" href="https://github.com/swordphp/happyblog" target="_blank">HappyBlog</a>
+</footer>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<script src="/assets/script.js"></script>
+</body>
+</html>
+{{end}}

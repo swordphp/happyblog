@@ -1,0 +1,273 @@
+html {
+    height: 100%;
+}
+
+body {
+    height: 100%;
+}
+
+.header {
+    line-height: 46px;
+    border-bottom: 1px #337ab7 dashed;
+}
+
+.min-width {
+    min-width: 1003px;
+}
+
+.userinfo {
+    text-align: right;
+}
+
+.list-group-item {
+    height: 3em;
+    text-align: center;
+    padding: 0;
+}
+
+.dropdown-menu {
+    padding: 0;
+    margin: 0;
+}
+
+#exampleInputAmount {
+    width: 520px;
+}
+
+.left-nav {
+    height: 100%;
+    max-width: 160px;
+    width: 160px;
+    float: left;
+}
+
+.left-nav ul li {
+    text-align: center;
+}
+
+.search-box {
+    text-align: center;
+}
+
+.right-dropdown {
+    left: unset;
+    right: -30px;
+    broder: 0px;
+}
+
+.right-dropdown a {
+    height: 26px;
+    line-height: 26px;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    font-size: 14px;
+    width: 100%;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background: #337ab7;
+    color: #FFF;
+}
+
+.contents {
+    display: block;
+    padding: 0 10px;
+    text-align: center;
+}
+
+.login {
+    text-align: center;
+    max-width: 500px;
+    height: 200px;
+    margin: 200px auto 0;
+    background: #edf0ff;
+    padding: 40px;
+    border-radius: 10px;
+}
+
+.btn-right {
+    text-align: right;
+}
+
+.mgin10 {
+    margin-top: 10px;
+}
+
+.login-btn {
+    margin-left: 10px;
+}
+
+.err-msg {
+    padding-right: 10px;
+    color: red;
+    max-width: 300px;
+    overflow: hidden;
+    display: block;
+    float: left;
+    height: 34px;
+    line-height: 34px;
+}
+
+.main-content {
+    width: 83.3%;
+    display: inline-block;
+    margin: 0 auto;
+    height: 100%;
+}
+
+/*articles list*/
+
+.list-content {
+    overflow-y: scroll;
+    height: 85%;
+    margin-bottom: 0;
+}
+
+.page-nav {
+    margin: 0;
+}
+
+.pager {
+    margin: 10px 0;
+}
+
+.curPage {
+    background: #337ab7 !important;
+    color: #fff !important;
+}
+
+.panel-body {
+    padding: 10px;
+    height: 100%;
+}
+
+.new-article {
+    padding: 5px;
+    text-align: right;
+    width: 100%;
+}
+
+.sort-box {
+    text-align: left;
+    line-height: 30px;
+    width: 60%;
+    display: inline-block;
+    float: left;
+}
+
+.articles-list {
+    height: 98%;
+    margin-top: 10px;
+    table-layout: fixed;
+}
+
+.left-nav-ul {
+    margin-top: 10px;
+}
+
+.table-header {
+    background: #abcdef;
+}
+
+.tag-width {
+    width: 60px;
+    min-width: 60px;
+    display: inline-block;
+    line-height: 1.2em;
+    margin-top: 3px;
+}
+
+.edit-article {
+    width: 100%;
+}
+
+.markdown-content {
+    width: 50%;
+    display: inline-block;
+}
+
+.article-view {
+    width: 49%;
+    display: inline-block;
+    float: right;
+    text-align: left;
+    height: 35.3em;
+    overflow-y: scroll;
+    border: 1px solid #abcdef;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.panel-edit-article {
+    margin-top: 10px;
+}
+
+.title-box {
+    width: 100%;
+    text-align: left;
+}
+
+.title-input {
+    width: 50% !important;
+}
+
+.padding-box {
+    padding: 10px 0;
+}
+
+.article-btns {
+    margin-top: -7px;
+    text-align: right;
+}
+
+.save-notice {
+    width: 35%;
+    overflow: hidden;
+    float: right;
+    height: 32px;
+    padding: 7px;
+    text-align: left;
+    margin: 0px;
+    display: none;
+}
+
+.full-width {
+    width: 100% !important;
+}
+
+#imageUpload {
+    text-align: left;
+    margin-top: 10px;
+    padding-top: 10px;
+}
+
+#urlInsert {
+    text-align: left;
+    martin-top: 10px;
+    padding-top: 10px;
+}
+
+#urlLink {
+    width: 240px;
+    font-size: 12px;
+}
+
+.albums-notice {
+    color: #aa0000;
+    display: none;
+}
+
+.tag-label{
+    cursor: pointer;
+    font-size: 1em;
+}
+.label-default{
+    background-color: #abb;
+}
+.tag-content {
+    line-height: 28px;
+    text-align: left;
+}

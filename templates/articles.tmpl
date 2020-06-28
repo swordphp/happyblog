@@ -1,0 +1,207 @@
+{{define "articles"}}
+    <div class="new-article">
+        <form class="form-inline sort-box">
+            <div class="form-group">
+                <div class="btn-group" role="group" id="ob-select" nowob="{{.ob}}">
+                    <button type="button" obstring="mtime" obstatus = "{{.obstatus}}" class="btn btn-default btn-xs">{{index .menu "articlelastmodify"}} </button>
+                    <button type="button" obstring="ctime" obstatus = "{{.obstatus}}" class="btn btn-default btn-xs">{{index .menu "articlecreatetime"}}</button>
+                    <button type="button" obstring="pub" obstatus = "{{.obstatus}}" class="btn btn-default btn-xs">{{index .menu "articlepublishstatus"}}</button>
+                </div>
+            </div>
+        </form>
+        <a type="button" href="/admin/article/new" class="btn btn-primary">{{index .menu "articlenew"}}</a>
+    </div>
+    <div class="panel panel-default list-content">
+        <div class="panel-body ">
+            <table class="table table-hover articles-list ">
+                <thead class="table-header">
+                    <tr>
+                        <th>{{index .menu "articletitle"}}</th>
+                        <th style="width:170px;text-align:center">{{index .menu "articlepublishstatus"}}</th>
+                        <th style="width:110px;text-align:center">{{index .menu "articleauthor"}}</th>
+                        <th style="width:170px;text-align:center">{{index .menu "articlecreatetime"}}</th>
+                        <th style="width:170px;text-align:center">{{index .menu "articlelastmodify"}}</th>
+                        <th style="width:80px;text-align:center">{{index .menu "operate"}}</th>
+                    </tr>
+                </thead>
+                <tbody class="articles-content-tbody">
+                {{range $row := .articleslist}}
+                <tr >
+                    <td  align="left" nowrap="on" style="overflow: hidden;text-overflow: ellipsis">
+                        {{$row.Title}}
+                    </td>
+                    <td>
+                        {{if eq $row.PubStatus 1}}
+                            <span class="label label-success tag-width">{{index $.menu "articletagpublished"}}</span>
+                        {{end}}
+                        {{if eq $row.PubStatus 0}}
+                            <span class="label label-default tag-width">{{index $.menu "articletagdraft"}}</span>
+                        {{end}}
+                        {{if eq $row.IndependPage 1}}
+                            <span class="label label-primary tag-width">{{index $.menu "articletagsinglepage"}}</span>
+                        {{end}}
+                    </td>
+                    <td align="center">
+                        {{$row.AuthorInfo.NickName}}
+                    </td>
+                    <td align="center">
+                        {{$row.CreateTime.Format "2006-01-02 15:04"}}
+                    </td>
+                    <td align="center">
+                        {{$row.UpdateTime.Format "2006-01-02 15:04"}}
+                    </td>
+                    <td align="center">
+                        <a type="button" href="/admin/article/edit/{{$row.Id}}" class="btn btn-primary btn-xs">{{index $.menu "articleoperateedit"}}</a>
+                    </td>
+                </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <nav aria-label="..." class="pull-right page-nav" totalRows="{{.totalRows}}" curPage="{{.curPage}}">
+        <ul class="pager">
+
+        </ul>
+    </nav>
+{{end}}
+
+{{define "articleedit"}}
+    <style>
+        .left-nav{
+            width:54px !important;
+        }
+        .main-content{
+            width:93% !important;
+            height:100%;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <div class="panel panel-default panel-edit-article">
+        <div class="panel-body edit-article">
+            <form class="form-inline" style="margin-bottom:15px;">
+                <div class="form-group  title-box">
+                    <label for="exampleInputName2">{{index .menu "articletitle"}}</label>
+                    <input type="hidden" value="{{$.articleInfo.Id}}" name="articleId" class="articleId"/>
+                    <input type="text"  class="form-control title-input" id="exampleInputName2" value="{{$.articleInfo.Title}}" placeholder="{{index $.menu "articletitleph"}}">
+                    <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-success btn-sm">{{index $.menu "articleinsert"}}</button>
+                    <div class="alert alert-info save-notice" role="alert">{{index $.menu "articlelastsave"}}:2020年4月13日21:59:12</div>
+                </div>
+            </form>
+            <div class="markdown-content">
+                <textarea spellcheck="false" class="form-control article-input-content" rows="24" placeholder="{{index $.menu "articlecontentph"}}">{{$.articleInfo.Content}}</textarea>
+            </div>
+            <div class="article-view">
+
+            </div>
+        </div>
+    </div>
+    <div class="form-group form-inline article-btns">
+        <div class="form-group">
+            <label for="tags">{{index $.menu "tag"}}:</label>
+            <input  style="width:320px" type="text" class="form-control" id="tags" placeholder="{{index $.menu "articletagsph"}}" value="">
+            <button type="button" data-toggle="modal" data-target="#tagModal" class="btn btn-info tag-btn">{{index $.menu "tagalready"}}</button>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">{{index $.menu "articlealbums"}}:</label>
+            <select id="exampleInputName2" class="form-control dropup form-control albumId" name="albumId">
+                <option value="-1">No Albums</option>
+                {{range $row := .albumsList}}
+                <option {{if eq $row.Id $.relationAlbumId}}selected{{end}} class="{{if eq $row.IsPublic 0}}label-danger{{end}} label-success" value="{{$row.Id}}">{{$row.AlbumName}}
+                </option>
+                {{end}}
+            </select>
+        </div>
+        <button type="button" id="viewSwitch" class="btn btn-sm">{{index $.menu "articleviewswich"}}</button>
+        <button type="button" class="btn btn-info btn-sm save-draft">{{index $.menu "articlesavedraft"}}</button>
+        <button type="button" class="btn btn-success btn-sm save-publish">{{index $.menu "articlesavepublished"}}</button>
+        <button type="button" class="btn btn-primary btn-sm save-publish-single">{{index $.menu "articlesavepublishedsinglepage"}}</button>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">{{index $.menu "articleinsertcontent"}}(Ctrl + i)</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="bs-example bs-example-tabs" data-example-id="togglable-tabs">
+                        <ul id="myTabs" class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#home" id="home-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true">{{index $.menu "image"}}</a></li>
+                            <li role="presentation" class=""><a href="#profile" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile" aria-expanded="false">{{index $.menu "url"}}</a></li>
+                        </ul>
+                        <div id="myTabContent" class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade active in" id="home" aria-labelledby="home-tab">
+                                <form enctype="multipart/form-data" id="imageUpload" class="form-inline">
+                                    <div class="form-group">
+                                        <input name="fileName" id="fileName" type="text" class="form-control" id="exampleInputPassword1" placeholder="{{index $.menu "named"}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="image" id="inputFile" type="file" id="inputFile">
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" id="doImgUpload" class="btn btn-primary">{{index $.menu "articleinsertcontent"}}</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="profile" aria-labelledby="profile-tab">
+                                <form id="urlInsert" class="form-inline" id="insertUrl">
+                                    <div class="form-group">
+                                        <input name="fileName" id="urlName" type="text" class="form-control" id="urlShowName" placeholder="{{index $.menu "named"}}">
+                                    </div>
+                                    <div class="form-group">
+                                        <input name="urlLink" id="urlLink" type="text" class="form-control" id="inputFile">
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="button" id="doUrlInsert" class="btn btn-primary">{{index $.menu "articleinsertcontent"}}</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{index $.menu "close"}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal tags-->
+    <div class="modal fade" id="tagModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabelTag">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">{{index $.menu "tagalready"}}</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="bs-example bs-example-tabs" data-example-id="togglable-tabs">
+                        <div id="myTabContent" class="tab-content tag-content">
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+                                <span class="label label-default tag-label">标签一</span>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-dismiss="modal">{{index $.menu "save"}}</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{index $.menu "close"}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}

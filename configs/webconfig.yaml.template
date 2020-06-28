@@ -1,0 +1,36 @@
+sitename: "HappyBlog"
+language: "cn"
+salt: "happyBlog"
+sessionalive: "7200"
+# 登录状态的有效期
+database:
+  driver: "mysql"
+  port: "3306"
+  hostname: "127.0.0.1"
+  username: "your mysql db username"
+  password: "your mysql db password"
+  maxidel: 10
+  maxopen: 20
+# 好像暴露了我密码的嗜好 ..
+
+timezone: "Asia/Shanghai"
+
+accessLog:
+  logfile: "./log"
+  logname: "access.log"
+
+serviceLog:
+  logfile: "./log"
+  logname: "service.log"
+
+
+fileviewurlpre: ""
+
+qiniuOSS:
+  bucket: "happyblog"
+  ak: ""
+  sk: "--"
+  https: "1"
+  zone: "ZoneHuanan"
+  usecdndomain : "0"
+  pathto: ""

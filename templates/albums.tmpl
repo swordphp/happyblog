@@ -1,0 +1,84 @@
+{{define "albums"}}
+    <div class="new-article">
+        <a type="button" href="#" id="albumnew" data-toggle="modal" data-target="#albumEdit" class="btn btn-primary">{{index $.menu "albumnew"}}</a>
+    </div>
+    <div class="panel panel-default albums-list">
+        <div class="panel-body ">
+            <table class="table table-hover articles-list ">
+                <thead class="table-header">
+                <tr>
+                    <th style="width:120px;text-align:center">{{index $.menu "albumname"}}</th>
+                    <th style="width:60px;text-align:center">{{index $.menu "albumusedcount"}}</th>
+                    <th style="width:80px;text-align:center">{{index $.menu "albumpubliced"}}</th>
+                    <th style="width:120px;text-align:center">{{index $.menu "albumauthor"}}</th>
+                    <th style="width:120px;text-align:center">{{index $.menu "albumcreateat"}}</th>
+                    <th style="width:120px;text-align:center">{{index $.menu "operate"}}</th>
+                </tr>
+                </thead>
+                <tbody class="articles-content-tbody">
+                {{range $row := .AlbumsList}}
+                    <tr >
+                        <td  align="center" nowrap="on" style="overflow: hidden;text-overflow: ellipsis">
+                            {{$row.AlbumName}}
+                        </td>
+                        <td>
+                            {{$row.ArticleTotal}}
+                        </td>
+                        <td>
+                            {{if eq $row.IsPublic 1}}
+                                <span class="label label-success tag-width">{{index $.menu "public"}}</span>
+                            {{end}}
+                            {{if eq $row.IsPublic 0}}
+                                <span class="label label-danger tag-width">{{index $.menu "private"}}</span>
+                            {{end}}
+                        </td>
+                        <td align="center">
+                            {{$row.AuthorInfo.NickName}}
+                        </td>
+                        <td align="center">
+                            {{$row.CreateTime.Format "2006-01-02 15:04"}}
+                        </td>
+                        <td align="center">
+                            <a type="button" href="#" albumId="{{$row.Id}}" class="btn btn-primary btn-xs editAlbum">{{index $.menu "articleoperateedit"}}</a>
+                        </td>
+                    </tr>
+                {{end}}
+                {{with .AlbumsList}}  {{else}}
+                <tr >
+                    <td rowspan="5" style="text-align:center">No Albums</td>
+                </tr>
+                {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="modal fade" tabindex="-1" role="dialog" id="albumEdit">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">{{index $.menu "albumedit"}}</h4>
+                </div>
+                <div class="modal-body">
+                    <form id="albumEditForm" name="albumEditForm">
+                        <div class="form-group form-inline ">
+                            <label for="albumName">{{index $.menu "albumname"}}</label>
+                            <input type="hidden" name="id" id="albumId" value="0" />
+                            <input type="text" name="albumName" class="form-control" id="albumName" placeholder="{{index $.menu "albumname"}}">
+                            <div class="btn-group">
+                                <input type="hidden" name="isPublic" id="isPublic" value="1" />
+                                <button type="button" targetval="1" class="albums-select btn btn-primary albums-public">{{index $.menu "public"}}</button>
+                                <button type="button" targetval="0" class="albums-select btn btn-default albums-private">{{index $.menu "private"}}</button>
+                            </div>
+                        </div>
+                    </form>
+                    <span class="albums-notice">**专辑名称不能为空</span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{index $.menu "cancel"}}</button>
+                    <button type="button" class="btn btn-primary save-album">{{index $.menu "save"}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{{end}}
