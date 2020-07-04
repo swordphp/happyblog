@@ -6,24 +6,24 @@ package models
  */
 
 import (
-	"github.com/jinzhu/gorm"
-	. "happyblog/library"
-	"time"
+    "github.com/jinzhu/gorm"
+    . "happyblog/library"
+    "time"
 )
 
 type Album struct{
-	Id int `gorm:"primary_key" json:"id"`
-	AlbumName string `gorm:"column:albumName" json:"albumName"`
-	IsPublic int8 `gorm:"column:isPublic" json:"isPublic"`
-	AuthorId int `gorm:"column:authorId" json:"authorInfo"`
-	CreateTime time.Time `gorm:"column:createTime" json:"createTime"`
-	ArticleTotal int `gorm:"column:articleTotal" json:"articleTotal"`
-	AuthorInfo User `gorm:"foreignkey:authorId" json:"authorInfo"`
+    Id int `gorm:"primary_key" json:"id"`
+    AlbumName string `gorm:"column:albumName" json:"albumName"`
+    IsPublic int8 `gorm:"column:isPublic" json:"isPublic"`
+    AuthorId int `gorm:"column:authorId" json:"authorInfo"`
+    CreateTime time.Time `gorm:"column:createTime" json:"createTime"`
+    ArticleTotal int `gorm:"column:articleTotal" json:"articleTotal"`
+    AuthorInfo User `gorm:"foreignkey:authorId" json:"authorInfo"`
 }
 
 
 func (Album) TableName() string {
-	return "happyblog_tblAlbum"
+    return "happyblog_tblAlbum"
 }
 
 /**
@@ -35,19 +35,19 @@ func (Album) TableName() string {
  * return: error
  */
 func (Album) GetAlbumList(page int) (rows []Album,err error) {
-	limitStart , limitEnd  := 0,0
-	if page<= 1 {
-		limitStart = 0
-		limitEnd = 10
-	} else {
-		limitStart = (page-1) *10
-		limitEnd = page*10
-	}
-	err = ConnInstance.Preload("AuthorInfo").Offset(limitStart).Limit(limitEnd).Find(&rows).Error
-	if err != nil {
-		Logf("get album list err","%v",page)
-	}
-	return
+    limitStart , limitEnd  := 0,0
+    if page<= 1 {
+        limitStart = 0
+        limitEnd = 10
+    } else {
+        limitStart = (page-1) *10
+        limitEnd = page*10
+    }
+    err = ConnInstance.Preload("AuthorInfo").Offset(limitStart).Limit(limitEnd).Find(&rows).Error
+    if err != nil {
+        Logf("get album list err","%v",page)
+    }
+    return
 }
 
 /**
@@ -56,11 +56,11 @@ func (Album) GetAlbumList(page int) (rows []Album,err error) {
  */
 
 func (mo Album) GetAlbumInfo(id int) (row Album,err error) {
-	err = ConnInstance.Preload("AuthorInfo").Find(&row,id).Error
-	if err != nil {
-		Logf("get album info error","%v",nil)
-	}
-	return row,err
+    err = ConnInstance.Preload("AuthorInfo").Find(&row,id).Error
+    if err != nil {
+        Logf("get album info error","%v",nil)
+    }
+    return row,err
 }
 /**
  * 创建专辑的方法
@@ -72,12 +72,12 @@ func (mo Album) GetAlbumInfo(id int) (row Album,err error) {
  * return: error
  */
 func (mo Album) CreateAlbum (album Album) (id int,err error) {
-	album.CreateTime = time.Now()
-	err = ConnInstance.Model(&mo).Create(&album).Error
-	if err != nil {
-		Logf("create album err","%v",album)
-	}
-	return album.Id,err
+    album.CreateTime = time.Now()
+    err = ConnInstance.Model(&mo).Create(&album).Error
+    if err != nil {
+        Logf("create album err","%v",album)
+    }
+    return album.Id,err
 }
 /**
  * 更新专辑的方法
@@ -88,14 +88,14 @@ func (mo Album) CreateAlbum (album Album) (id int,err error) {
  * return: bool
  */
 func (mo Album) UpdateAlbum (album Album) (res bool) {
-	err := ConnInstance.Model(&mo).Updates(album).Error
-	if err != nil {
-		Logf("update album info error","%v",album)
-	}
-	if ConnInstance.RowsAffected > 0 {
-		return true
-	}
-	return false
+    err := ConnInstance.Model(&mo).Updates(album).Error
+    if err != nil {
+        Logf("update album info error","%v",album)
+    }
+    if ConnInstance.RowsAffected > 0 {
+        return true
+    }
+    return false
 }
 
 /**
@@ -107,10 +107,11 @@ func (mo Album) UpdateAlbum (album Album) (res bool) {
  * return: bool
  */
 func (mo Album) UpdateAlbumArticleTotal (albumId int,totalIncr int) (res bool) {
-	err := ConnInstance.Model(&mo).Where("id = ?",albumId).
-		Update("articleTotal",gorm.Expr("articleTotal + ?",totalIncr)).Error
-	if err != nil {
-		Logf("incr article count error ","%v",nil)
-	}
-	return true
+    err := ConnInstance.Model(&mo).Where("id = ?",albumId).
+        Update("articleTotal",gorm.Expr("articleTotal + ?",totalIncr)).Error
+    if err != nil {
+        Logf("incr article count error ","%v",nil)
+    }
+    return true
 }
+

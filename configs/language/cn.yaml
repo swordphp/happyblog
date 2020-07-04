@@ -36,6 +36,7 @@ menu:
   articlestatus: "状态"
   articleauthor: "文章作者"
   articlesortby: "排序"
+  articleoperatedel: "删除"
   articlelastmodify: "最后修改"
   articlepublishstatus: "发布状态"
   articlecreatetime: "创建时间"

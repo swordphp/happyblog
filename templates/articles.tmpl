@@ -21,7 +21,7 @@
                         <th style="width:110px;text-align:center">{{index .menu "articleauthor"}}</th>
                         <th style="width:170px;text-align:center">{{index .menu "articlecreatetime"}}</th>
                         <th style="width:170px;text-align:center">{{index .menu "articlelastmodify"}}</th>
-                        <th style="width:80px;text-align:center">{{index .menu "operate"}}</th>
+                        <th style="width:100px;text-align:center">{{index .menu "operate"}}</th>
                     </tr>
                 </thead>
                 <tbody class="articles-content-tbody">
@@ -52,6 +52,7 @@
                     </td>
                     <td align="center">
                         <a type="button" href="/admin/article/edit/{{$row.Id}}" class="btn btn-primary btn-xs">{{index $.menu "articleoperateedit"}}</a>
+                        <a type="button" href="#" class="btn btn-danger btn-xs" removeId="{{$row.Id}}" data-toggle="modal" data-target="#remove">{{index $.menu "articleoperatedel"}}</a>
                     </td>
                 </tr>
                     {{end}}
@@ -64,6 +65,26 @@
 
         </ul>
     </nav>
+
+    <!-- 增加一个删除确认的弹出框 -->
+    <div class="modal fade" tabindex="-1" role="dialog" id="remove">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">删除确认</h4>
+                </div>
+                <div class="modal-body">
+                    <p>确定删除吗?此操作无法恢复!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                    <button type="button" articleId=""  class="removeBtn btn btn-primary">确定</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
 {{end}}
 
 {{define "articleedit"}}
