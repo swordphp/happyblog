@@ -51,7 +51,7 @@ menu:
   articlesavepublishedsinglepage: "发布独立页面"
   articlelastsave: "最后保存"
   articlecontentph: "此处输入文章内容,支持markdown"
-  articletagsph: "输入标签,最多5个,逗号分隔"
+  articletagsph: "单个文章最多五个标签"
   articletitleph: "在这里输入文章标题"
   articleinsert: "插入＋"
   articleinsertcontent: "插入内容"
@@ -65,4 +65,4 @@ menu:
   albumusedcount: "文章总数"
 
 
-  tagalready: "选择已有"
+  tagalready: "选择标签"

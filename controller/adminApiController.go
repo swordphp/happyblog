@@ -81,8 +81,7 @@ func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
  * param: *gin.Context c
  */
 func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
-    tmpId,_ := strconv.ParseInt(c.DefaultPostForm("id","0"),0,64)
-    articleId := int(tmpId)
+    articleId,_ := strconv.Atoi(c.DefaultPostForm("id",""))
     articleRow := new(Article)
     pubStatus,_ := strconv.ParseInt(c.PostForm("pubStatus"),0,8)
     independPage ,_ := strconv.ParseInt(c.PostForm("independPage"),0,8)
@@ -91,37 +90,37 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
     articleRow.IndependPage = int8(independPage)
     articleRow.Title = c.DefaultPostForm("title","no title")
     albumId,_ := strconv.Atoi(c.PostForm("albumId"))
-    ArticleModel := new(Article)
-    AlbumsModel := new(Album)
-    RelationArticleAlbumsModel := new(RelationArticleAlbums)
+    articleModel := new(Article)
+    albumModel := new(Album)
+    relationArticleAlbumsModel := new(RelationArticleAlbums)
     if articleId != 0 {
 
         //此处获取文章原始的专辑ID
 
-        originAlbumId := RelationArticleAlbumsModel.GetBelongAlbumByArticleId(articleId)
+        originAlbumId := relationArticleAlbumsModel.GetBelongAlbumByArticleId(articleId)
 
         //更新
         articleRow.Id = articleId
-        ArticleModel.UpdateArticleRow(*articleRow)
+        articleModel.UpdateArticleRow(*articleRow)
         if albumId != -1 {
-            _ = RelationArticleAlbumsModel.UpdateRowByArticleId(articleId,albumId)
+            _ = relationArticleAlbumsModel.UpdateRowByArticleId(articleId,albumId)
         }
         if albumId != originAlbumId {
             //专辑属性发生变化
-            AlbumsModel.UpdateAlbumArticleTotal(originAlbumId,-1)
-            AlbumsModel.UpdateAlbumArticleTotal(albumId,1)
+            albumModel.UpdateAlbumArticleTotal(originAlbumId,-1)
+            albumModel.UpdateAlbumArticleTotal(albumId,1)
         }
 
     } else {
         //创建
         cUserInfo := ctrl.GetCacheUinfo(c)
         articleRow.AuthorId = cUserInfo.Id
-        insertId  := ArticleModel.CreateArticleRow(*articleRow)
+        insertId  := articleModel.CreateArticleRow(*articleRow)
         if albumId != -1 {
-            _ = RelationArticleAlbumsModel.UpdateRowByArticleId(insertId,albumId)
+            _ = relationArticleAlbumsModel.UpdateRowByArticleId(insertId,albumId)
         } else {
             //增加专辑引用数量
-            AlbumsModel.UpdateAlbumArticleTotal(albumId,1)
+            albumModel.UpdateAlbumArticleTotal(albumId,1)
         }
         articleId = insertId
     }

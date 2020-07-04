@@ -75,7 +75,7 @@
         let uri = location.href;
         if (totalPages <= 20) {
             for (let i = 1; i <= totalPages; i++) {
-                if (curPage == i) {
+                if (curPage === i) {
                     navArr.push($("<li class='active'><a class='curPage' href='#'> " + i + " </a></li>"));
                 } else {
                     uri = addURLParam(uri, "page", i);
@@ -86,7 +86,7 @@
         } else {
             //渲染最前面五页
             for (let i = 1; i <= 5; i++) {
-                if (curPage == i) {
+                if (curPage === i) {
                     navArr.push($("<li class='active'><a class='curPage' href='#'> " + i + " </a></li>"));
                 } else {
                     uri = addURLParam(uri, "page", i);
@@ -107,7 +107,7 @@
                 let forStart = curPage > 8 ? curPage - 2 : 6;
                 let forEnd = curPage < (totalPages - 6) ? (curPage + 2) : totalPages - 5;
                 for (let i = forStart; i <= forEnd; i++) {
-                    if (curPage == i) {
+                    if (curPage === i) {
                         navArr.push($("<li class='active'><a class='curPage' href='#'> " + i + " </a></li>"));
                     } else {
                         uri = addURLParam(uri, "page", i);
@@ -396,7 +396,7 @@
         $(".save-publish").on("click", function () {
             clearInterval(autoSaveHandle);
             saveArticle(0, 0);
-            $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(3000).fadeOut(400, function () {
+            $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(300).fadeOut(100, function () {
                 window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
             });
 
@@ -405,7 +405,7 @@
         $(".save-publish-single").on("click", function () {
             clearInterval(autoSaveHandle);
             saveArticle(0, 1);
-            $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(3000).fadeOut(400, function () {
+            $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(300).fadeOut(100, function () {
                 window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
             });
         });
@@ -413,21 +413,36 @@
     }();
 
     const tagSelect = function (){
+
         let selectedCount = 0;
-        $(".tag-btn").on("click",function(){
-           selectedCount = $("#tags").val().split(",").length-1;
-            if(selectedCount == 0 && $("#tags").val().length != 0) {
-                selectedCount = 1;
-            } else if(selectedCount > 0 ){
-                selectedCount += 1;
-            }
-        });
+        // $(".tag-btn").on("click",function(){
+        //     //计算剩余可以选择的标签数量
+        //    selectedCount = $("#tagsShow").val().split(",").length-1;
+        //     if(selectedCount == 0 && $("#tagsShow").val().length != 0) {
+        //         selectedCount = 1;
+        //     } else if(selectedCount > 0 ){
+        //         selectedCount += 1;
+        //     }
+        // });
         $(".tag-label").on("click",function(e){
             if ($(".tag-content").children(".label-primary").length <= (4-selectedCount)){
+                //可以继续选择的情况
                 $(this).toggleClass("label-primary").toggleClass("label-default");
+
             } else if($(this).hasClass("label-primary")) {
+                //已经超过5个标签了
                 $(this).toggleClass("label-primary").toggleClass("label-default");
             }
+        });
+        $(".saveTags").on("click",function(){
+            var tagsValues = Array();
+            var tagsString = Array();
+            $(".tag-content").children(".label-primary").each(function(){
+                tagsValues.push($(this).attr("tagId"));
+                tagsString.push($(this).html());
+            });
+            $("#tagsValue").val(tagsValues.join(","));
+            $("#tagsShow").val(tagsString.join(","));
         });
     }();
 

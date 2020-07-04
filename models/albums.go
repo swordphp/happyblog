@@ -55,7 +55,7 @@ func (Album) GetAlbumList(page int) (rows []Album,err error) {
  * #todo 还需要加入文章的专辑引用数量
  */
 
-func (mo Album) GetAlbumInfo(id int) (row Album,err error) {
+func (model Album) GetAlbumInfo(id int) (row Album,err error) {
     err = ConnInstance.Preload("AuthorInfo").Find(&row,id).Error
     if err != nil {
         Logf("get album info error","%v",nil)
@@ -71,9 +71,9 @@ func (mo Album) GetAlbumInfo(id int) (row Album,err error) {
  * return: int64
  * return: error
  */
-func (mo Album) CreateAlbum (album Album) (id int,err error) {
+func (model Album) CreateAlbum (album Album) (id int,err error) {
     album.CreateTime = time.Now()
-    err = ConnInstance.Model(&mo).Create(&album).Error
+    err = ConnInstance.Model(&model).Create(&album).Error
     if err != nil {
         Logf("create album err","%v",album)
     }
@@ -87,8 +87,8 @@ func (mo Album) CreateAlbum (album Album) (id int,err error) {
  * param: int    id
  * return: bool
  */
-func (mo Album) UpdateAlbum (album Album) (res bool) {
-    err := ConnInstance.Model(&mo).Updates(album).Error
+func (model Album) UpdateAlbum (album Album) (res bool) {
+    err := ConnInstance.Model(&model).Updates(album).Error
     if err != nil {
         Logf("update album info error","%v",album)
     }
@@ -106,8 +106,8 @@ func (mo Album) UpdateAlbum (album Album) (res bool) {
  * param: int    id
  * return: bool
  */
-func (mo Album) UpdateAlbumArticleTotal (albumId int,totalIncr int) (res bool) {
-    err := ConnInstance.Model(&mo).Where("id = ?",albumId).
+func (model Album) UpdateAlbumArticleTotal (albumId int,totalIncr int) (res bool) {
+    err := ConnInstance.Model(&model).Where("id = ?",albumId).
         Update("articleTotal",gorm.Expr("articleTotal + ?",totalIncr)).Error
     if err != nil {
         Logf("incr article count error ","%v",nil)

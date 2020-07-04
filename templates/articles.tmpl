@@ -104,7 +104,7 @@
                 <div class="form-group  title-box">
                     <label for="exampleInputName2">{{index .menu "articletitle"}}</label>
                     <input type="hidden" value="{{$.articleInfo.Id}}" name="articleId" class="articleId"/>
-                    <input type="text"  class="form-control title-input" id="exampleInputName2" value="{{$.articleInfo.Title}}" placeholder="{{index $.menu "articletitleph"}}">
+                    <input type="text"   class="form-control title-input" id="exampleInputName2" value="{{$.articleInfo.Title}}" placeholder="{{index $.menu "articletitleph"}}">
                     <button type="button" data-toggle="modal" data-target="#myModal" class="btn btn-success btn-sm">{{index $.menu "articleinsert"}}</button>
                     <div class="alert alert-info save-notice" role="alert">{{index $.menu "articlelastsave"}}:2020年4月13日21:59:12</div>
                 </div>
@@ -120,7 +120,8 @@
     <div class="form-group form-inline article-btns">
         <div class="form-group">
             <label for="tags">{{index $.menu "tag"}}:</label>
-            <input  style="width:320px" type="text" class="form-control" id="tags" placeholder="{{index $.menu "articletagsph"}}" value="">
+            <input type="hidden" name="selectTags" id="tagsValue" value="" />
+            <input  style="width:320px" type="text" readonly class="form-control" id="tagsShow" placeholder="{{index $.menu "articletagsph"}}" value="">
             <button type="button" data-toggle="modal" data-target="#tagModal" class="btn btn-info tag-btn">{{index $.menu "tagalready"}}</button>
         </div>
         <div class="form-group">
@@ -202,23 +203,14 @@
                 <div class="modal-body">
                     <div class="bs-example bs-example-tabs" data-example-id="togglable-tabs">
                         <div id="myTabContent" class="tab-content tag-content">
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
-                                <span class="label label-default tag-label">标签一</span>
+                            {{range $tagRow := .tagsList}}
+                                <span class="label label-default tag-label" tagId="{{$tagRow.Id}}">{{$tagRow.TagName}}</span>
+                            {{end}}
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" data-dismiss="modal">{{index $.menu "save"}}</button>
+                    <button type="button" class="btn btn-success saveTags" data-dismiss="modal">{{index $.menu "save"}}</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{index $.menu "close"}}</button>
                 </div>
             </div>
