@@ -465,4 +465,27 @@
             },
         });
     }
+
+    /**
+     * 删除文章的方法
+     */
+    const removeArticle = function(){
+        $(".articleRemove").on("click",function(){
+            console.log($(this).attr("removeId"));
+            $(".removeBtn").attr("articleid",$(this).attr("removeId"));
+        });
+        $(".removeBtn").on("click",function(){
+            $.get({
+                url: "/admin/api/articleremove?id="+$(this).attr("articleid"),
+                success: function (res) {
+                    console.log(res);
+                    $('#remove').modal('hide');
+                    window.location.reload();
+                },
+            });
+        })
+    }();
+
+
+    //文件结尾
 })();

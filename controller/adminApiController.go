@@ -65,12 +65,13 @@ func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
     //删除专辑的关联
     relationAlbum := new(RelationArticleAlbums)
     albumId := relationAlbum.GetBelongAlbumByArticleId(articleId)
-    relationAlbum.RemoveRowByArticleId(articleId)
-    //减少专辑计数
-    albumModel := new(Album)
-    albumModel.UpdateAlbumArticleTotal(albumId,-1)
 
-
+    //减少专辑计数,移除专辑关联
+    if albumId != 0 {
+        relationAlbum.RemoveRowByArticleId(articleId)
+        albumModel := new(Album)
+        albumModel.UpdateAlbumArticleTotal(albumId,-1)
+    }
     c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","affectRows":rowAffect})
 }
 

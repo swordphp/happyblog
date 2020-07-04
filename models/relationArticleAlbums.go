@@ -23,8 +23,11 @@ func (model RelationArticleAlbums) TableName() string {
 func (model RelationArticleAlbums) GetBelongAlbumByArticleId (ArticleId int) (AlbumId int) {
     albumObj := new(RelationArticleAlbums)
     err := ConnInstance.Model(&model).Where("articleId = ?", ArticleId).Find(&albumObj).Error
+    if ConnInstance.RecordNotFound() {
+        return 0
+    }
     if err != nil {
-        Logf("get belong album err","%v",err)
+        Logf(" get belong album err","%v",err)
     }
     return albumObj.AlbumId
 }
@@ -55,7 +58,7 @@ func (model RelationArticleAlbums) UpdateRowByArticleId (articleId int ,albumId 
  * return: int
  */
 func (model RelationArticleAlbums) RemoveRowByArticleId (articleId int) (affectRows int64) {
-    err := ConnInstance.Model(&model).Delete("articleId = ?",articleId).Error
+    err := ConnInstance.Delete(&model,"articleId = ?",articleId).Error
     if err != nil {
         Logf("remove relation err","%v",err)
     }
