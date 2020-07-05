@@ -2,6 +2,7 @@ package controller
 
 import (
     "bytes"
+    "fmt"
     "github.com/gin-gonic/gin"
     lib "happyblog/library"
     . "happyblog/models"
@@ -75,6 +76,26 @@ func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
     c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","affectRows":rowAffect})
 }
 
+
+/**
+ * 添加标签的方法
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) TagAdd(c *gin.Context) {
+    tagName,_ :=c.GetPostForm("tagName")
+    modelTags := new(Tags)
+    tagId ,err := modelTags.AddTag(tagName)
+    if err != nil {
+        errInfo := fmt.Sprintf("%v",err)
+        c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":errInfo,"data":""})
+    }
+    resInfo := make(map[string]string)
+    resInfo["tagName"] = tagName
+    resInfo["tagId"] = strconv.Itoa(tagId)
+    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","data":resInfo})
+}
+
 /**
  * 保存文章的方法,接口调用 post
  *
@@ -82,17 +103,18 @@ func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
  */
 func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
     articleId,_ := strconv.Atoi(c.DefaultPostForm("id",""))
-    articleRow := new(Article)
+    articleModel := new(Article)
     pubStatus,_ := strconv.ParseInt(c.PostForm("pubStatus"),0,8)
     independPage ,_ := strconv.ParseInt(c.PostForm("independPage"),0,8)
-    articleRow.Content = c.PostForm("content")
-    articleRow.PubStatus = int8(pubStatus)
-    articleRow.IndependPage = int8(independPage)
-    articleRow.Title = c.DefaultPostForm("title","no title")
+    articleModel.Content = c.PostForm("content")
+    articleModel.PubStatus = int8(pubStatus)
+    articleModel.IndependPage = int8(independPage)
+    articleModel.Title = c.DefaultPostForm("title","no title")
     albumId,_ := strconv.Atoi(c.PostForm("albumId"))
-    articleModel := new(Article)
+
     albumModel := new(Album)
     relationArticleAlbumsModel := new(RelationArticleAlbums)
+
     if articleId != 0 {
 
         //此处获取文章原始的专辑ID
@@ -100,8 +122,8 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
         originAlbumId := relationArticleAlbumsModel.GetBelongAlbumByArticleId(articleId)
 
         //更新
-        articleRow.Id = articleId
-        articleModel.UpdateArticleRow(*articleRow)
+        articleModel.Id = articleId
+        articleModel.UpdateArticleRow(*articleModel)
         if albumId != -1 {
             _ = relationArticleAlbumsModel.UpdateRowByArticleId(articleId,albumId)
         }
@@ -114,8 +136,8 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
     } else {
         //创建
         cUserInfo := ctrl.GetCacheUinfo(c)
-        articleRow.AuthorId = cUserInfo.Id
-        insertId  := articleModel.CreateArticleRow(*articleRow)
+        articleModel.AuthorId = cUserInfo.Id
+        insertId  := articleModel.CreateArticleRow(*articleModel)
         if albumId != -1 {
             _ = relationArticleAlbumsModel.UpdateRowByArticleId(insertId,albumId)
         } else {
@@ -123,6 +145,22 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
             albumModel.UpdateAlbumArticleTotal(albumId,1)
         }
         articleId = insertId
+    }
+
+    //此处处理tags相关信息
+    tagsStr := c.DefaultPostForm("tags","")
+    if tagsStr != "" {
+        tagSlice := strings.Split(tagsStr,",")
+        tagIds := make([]int,0)
+        for _,tagId := range tagSlice {
+            intTagId ,_ := strconv.Atoi(tagId)
+            if intTagId == 0 {
+                continue
+            }
+            tagIds = append(tagIds, intTagId)
+        }
+        modelReTags := new(RelationArticleTags)
+        modelReTags.Relations(tagIds,articleId)
     }
     c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"","articleId":articleId})
 }

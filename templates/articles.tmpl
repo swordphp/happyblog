@@ -119,12 +119,15 @@
     </div>
     <div class="form-group form-inline article-btns">
         <div class="form-group">
+            <!--标签输入框-->
             <label for="tags">{{index $.menu "tag"}}:</label>
-            <input type="hidden" name="selectTags" id="tagsValue" value="" />
-            <input  style="width:320px" type="text" readonly class="form-control" id="tagsShow" placeholder="{{index $.menu "articletagsph"}}" value="">
-            <button type="button" data-toggle="modal" data-target="#tagModal" class="btn btn-info tag-btn">{{index $.menu "tagalready"}}</button>
+            <input type="hidden" name="selectTags" id="tagsValue" value="{{$.relationTagsIds}}" />
+            <input  style="width:320px" type="text" readonly class="form-control" id="tagsShow" name="tagsShow" placeholder="{{index $.menu "articletagsph"}}" value="{{$.relationTagsStr}}">
+            <button type="button" data-toggle="modal" data-target="#tagModal" class="btn btn-info tag-btn">{{index $.menu "tagchoise"}}</button>
+            <!--标签输入框-->
         </div>
         <div class="form-group">
+            <!--分类选择框-->
             <label for="exampleInputName2">{{index $.menu "articlealbums"}}:</label>
             <select id="exampleInputName2" class="form-control dropup form-control albumId" name="albumId">
                 <option value="-1">No Albums</option>
@@ -133,6 +136,7 @@
                 </option>
                 {{end}}
             </select>
+            <!--分类选择框-->
         </div>
         <button type="button" id="viewSwitch" class="btn btn-sm">{{index $.menu "articleviewswich"}}</button>
         <button type="button" class="btn btn-info btn-sm save-draft">{{index $.menu "articlesavedraft"}}</button>
@@ -198,7 +202,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">{{index $.menu "tagalready"}}</h4>
+                    <h4 class="modal-title" id="myModalLabel">{{index $.menu "tagchoise"}}</h4>
                 </div>
                 <div class="modal-body">
                     <div class="bs-example bs-example-tabs" data-example-id="togglable-tabs">
@@ -209,6 +213,14 @@
                         </div>
                     </div>
                 </div>
+                <form class="form-inline tagInputs" >
+                    <div class="form-group">
+                        <label for="exampleInputName2">{{index $.menu "tagadd"}}</label>
+                        <input type="text" name="tagname" id="newTagName" class="form-control" id="exampleInputName2" placeholder="{{index $.menu "tagname"}}">
+                    </div>
+                    <button type="submit" class="btn btn-default addTag">{{index $.menu "add"}}</button>
+                </form>
+
                 <div class="modal-footer">
                     <button type="button" class="btn btn-success saveTags" data-dismiss="modal">{{index $.menu "save"}}</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{index $.menu "close"}}</button>

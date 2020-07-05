@@ -51,3 +51,20 @@ func (model Tags) GetTagsInfo(tagsName []string)(res []Tags) {
 func (model Tags) RemoveTagByName(tagName string) (affectRows int) {
     return
 }
+
+/**
+ * 创建tag的方法
+ * param: string tagName
+ * return: int
+ * return: error
+ */
+func (model Tags) AddTag(tagName string) (id int,err error) {
+    tags := new(Tags)
+    tags.RefCount = 0
+    tags.TagName = tagName
+    err = ConnInstance.Model(&model).Create(&tags).Error
+    if err != nil {
+        Logf("create tag error ","%v",err)
+    }
+    return tags.Id,err
+}

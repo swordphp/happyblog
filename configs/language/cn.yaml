@@ -31,6 +31,8 @@ menu:
   public: "公开"
   private: "私有"
 
+  add: "添加"
+
   articlenew: "新文章"
   articletitle: "文章标题"
   articlestatus: "状态"
@@ -65,4 +67,6 @@ menu:
   albumusedcount: "文章总数"
 
 
-  tagalready: "选择标签"
+  tagchoise: "选择标签"
+  tagadd: "添加标签"
+  tagname: "标签名称"

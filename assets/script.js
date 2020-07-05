@@ -413,18 +413,20 @@
     }();
 
     const tagSelect = function (){
-
+        $(document).on("ready",function(){
+            var currentTagsIdStr = $("#tagsValue").val();
+            if (currentTagsIdStr != undefined) {
+                var currentTags = currentTagsIdStr.split(",")
+            }
+            $(".tag-content").children().each(function(){
+               var id = $(this).attr("tagId");
+               if ($.inArray(id,currentTags) != -1) {
+                   $(this).toggleClass("label-primary").toggleClass("label-default");
+               }
+            });
+        });
         let selectedCount = 0;
-        // $(".tag-btn").on("click",function(){
-        //     //计算剩余可以选择的标签数量
-        //    selectedCount = $("#tagsShow").val().split(",").length-1;
-        //     if(selectedCount == 0 && $("#tagsShow").val().length != 0) {
-        //         selectedCount = 1;
-        //     } else if(selectedCount > 0 ){
-        //         selectedCount += 1;
-        //     }
-        // });
-        $(".tag-label").on("click",function(e){
+        $(document).on("click",".tag-label",function(e){
             if ($(".tag-content").children(".label-primary").length <= (4-selectedCount)){
                 //可以继续选择的情况
                 $(this).toggleClass("label-primary").toggleClass("label-default");
@@ -447,8 +449,6 @@
     }();
 
 
-    //#todo 如果标签数量已经选择了5个,则需要控制输入标签
-
 
 
     function saveArticle(draft = 1, single = 0) {
@@ -461,7 +461,7 @@
         data['id'] = $(".articleId").val();
         data['pubStatus'] = $(".pubStatus").val();
         data['albumId'] = $(".albumId").val();
-
+        data['tags'] = $("#tagsValue").val();
         if (draft == 1) {
             //存草稿
             data['pubStatus'] = 0;
@@ -501,6 +501,35 @@
         })
     }();
 
+    /**
+     * 添加tag的方法
+     */
+    const tagAdd = function(){
+        $(".tagInputs").on("submit",function(){
+            var tagName = $("#newTagName").val();
+            console.log(tagName)
+            //添加的标签不能为空
+            if (tagName == "" || tagName == undefined) {
+                return false;
+            }
+            $(".tag-content").children().each(function(){
+                //不能添加已有标签
+                if (tagName == $(this).html()) {
+                    return false;
+                }
+            });
+            $.post({
+                url: "/admin/api/tagadd",
+                data: {"tagName":tagName},
+                success: function (res) {
+                    tagInfo = $('<span class="label label-default tag-label" tagId="'+res.data.tagId+'">'+res.data.tagName+'</span>');
+                    $(".tag-content").append(tagInfo);
+                    $("#newTagName").val("");
+                },
+            });
+            return false;
+        })
+    }();
 
     //文件结尾
 })();

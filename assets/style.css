@@ -178,6 +178,10 @@ body {
     background: #abcdef;
 }
 
+.tagInputs{
+    text-align: left;
+    margin:10px 20px;
+}
 .tag-width {
     width: 60px;
     min-width: 60px;

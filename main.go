@@ -48,6 +48,7 @@ func main(){
         adminGroup.POST("/api/upload",CAdminApi.Upload)
         adminGroup.POST("/api/articlesave",CAdminApi.ArticleSave)
         adminGroup.GET("/api/articleremove",CAdminApi.ArticleRemove)
+        adminGroup.POST("/api/tagadd",CAdminApi.TagAdd)
     }
 
     apiGroup := r.Group("/api")
