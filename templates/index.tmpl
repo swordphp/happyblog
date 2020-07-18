@@ -56,7 +56,7 @@
             <li role="presentation" {{if .welcome}}class="active"{{end}}><a href="/admin/">{{index .menu "dashboard"}}</a></li>
             <li role="presentation" {{if or .articles .articleEdit}}class="active"{{end}} ><a href="/admin/articles">{{index .menu "articles"}}</a></li>
             <li role="presentation" {{if .albums}}class="active"{{end}}><a href="/admin/albums">{{index .menu "albums"}}</a></li>
-            <li role="presentation" {{if .tags}}class="active"{{end}}><a href="/admin/tags">{{index .menu "tags"}}</a></li>
+{{/*            <li role="presentation" {{if .tags}}class="active"{{end}}><a href="/admin/tags">{{index .menu "tags"}}</a></li>*/}}
             <li role="presentation" {{if .users}}class="active"{{end}}><a href="/admin/users">{{index .menu "users"}}</a></li>
 {{/*            <li role="presentation"><a href="/admin/logout">{{index .menu "logout"}}</a></li>*/}}
         </ul>

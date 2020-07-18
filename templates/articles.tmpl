@@ -19,7 +19,6 @@
                         <th>{{index .menu "articletitle"}}</th>
                         <th style="width:170px;text-align:center">{{index .menu "articlepublishstatus"}}</th>
                         <th style="width:110px;text-align:center">{{index .menu "articleauthor"}}</th>
-                        <th style="width:170px;text-align:center">{{index .menu "articlecreatetime"}}</th>
                         <th style="width:170px;text-align:center">{{index .menu "articlelastmodify"}}</th>
                         <th style="width:100px;text-align:center">{{index .menu "operate"}}</th>
                     </tr>
@@ -43,9 +42,6 @@
                     </td>
                     <td align="center">
                         {{$row.AuthorInfo.NickName}}
-                    </td>
-                    <td align="center">
-                        {{$row.CreateTime.Format "2006-01-02 15:04"}}
                     </td>
                     <td align="center">
                         {{$row.UpdateTime.Format "2006-01-02 15:04"}}
