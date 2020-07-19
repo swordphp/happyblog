@@ -30,7 +30,7 @@ func (Article) TableName () string{
  * return: error
  */
 func (Article) GetArticleInfo(id int) (row Article,err error) {
-    ConnInstance.First(&row,id)
+    ConnInstance.Preload("AuthorInfo").First(&row,id)
     return
 }
 
@@ -44,6 +44,32 @@ func (model Article) GetArticlesTotal() (total int,err error) {
     ConnInstance.Model(&model).Count(&total)
     return
 }
+
+/**
+ * 获取用于展示的文章列表
+ *
+ * param: int page
+ * return: []Article
+ * return: error
+ */
+func (Article) GetArticleListView(page int) (rows []Article,err error) {
+    limitStart := 0
+    perPage := 10
+    if page<= 1 {
+        limitStart = 0
+    } else {
+        limitStart = (page-1) *perPage
+    }
+    err = ConnInstance.Debug().Preload("AuthorInfo").Where("pubStatus = ? and independPage <> ?",1,1).Order("updateTime DESC").Offset(limitStart).Limit(perPage).Find(&rows).Error
+    if err != nil{
+        return nil ,err
+    }
+    return rows,err
+}
+
+
+
+
 
 /**
  * 通过排序字段获取

@@ -15,10 +15,10 @@ type Album struct{
     Id int `gorm:"primary_key" json:"id"`
     AlbumName string `gorm:"column:albumName" json:"albumName"`
     IsPublic int8 `gorm:"column:isPublic" json:"isPublic"`
-    AuthorId int `gorm:"column:authorId" json:"authorInfo"`
+    AuthorId int `gorm:"column:authorId" json:"-"`
     CreateTime time.Time `gorm:"column:createTime" json:"createTime"`
     ArticleTotal int `gorm:"column:articleTotal" json:"articleTotal"`
-    AuthorInfo User `gorm:"foreignkey:authorId" json:"authorInfo"`
+    AuthorInfo *User `gorm:"foreignkey:authorId" json:"authorInfo,omitempty"`
 }
 
 
@@ -52,16 +52,31 @@ func (Album) GetAlbumList(page int) (rows []Album,err error) {
 
 /**
  * 获取一个专辑的相关信息
- * #todo 还需要加入文章的专辑引用数量
+ * 专辑引用数量采用其他方式实现
  */
 
 func (model Album) GetAlbumInfo(id int) (row Album,err error) {
-    err = ConnInstance.Preload("AuthorInfo").Find(&row,id).Error
+    err = ConnInstance.Debug().Model(&model).Preload("AuthorInfo").Find(&row,id).Error
     if err != nil {
         Logf("get album info error","%v",nil)
     }
     return row,err
 }
+
+/**
+ * 获取一个专辑的相关信息
+ * 专辑引用数量采用其他方式实现
+ */
+
+func (model Album) GetAlbumInfoView(id int) (row Album,err error) {
+    err = ConnInstance.Model(&model).Preload("AuthorInfo").Where("isPublic = ?",1).Find(&row,id).Error
+    if err != nil {
+        Logf("get album info error","%v",nil)
+    }
+    return row,err
+}
+
+
 /**
  * 创建专辑的方法
  *

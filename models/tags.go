@@ -6,8 +6,7 @@ import . "happyblog/library"
 type Tags struct{
     Id int `gorm:"primary_key" json:"id"`
     TagName string `gorm:"column:tagName;unique" json:"tagName"`
-    RefCount int8 `gorm:"column:refCount" json:"refCount"`
-    CreateTime time.Time `gorm:"column:createTime" json:"createTime"`
+    CreateTime time.Time `gorm:"column:createTime" json:"-"`
 }
 
 
@@ -22,6 +21,20 @@ func (Tags) TableName() string{
  */
 func (model Tags) GetAllTags() (res []Tags,err error) {
     err = ConnInstance.Model(&model).Find(&res).Error
+    if err != nil {
+        Logf("get tags err","%v",err)
+    }
+    return res,err
+}
+/**
+ * 通过标签ID 获取标签信息
+ *
+ * param: []int ids
+ * return: []Tags
+ * return: error
+ */
+func (model Tags) GetTagsByIds(ids []int)(res []Tags,err error) {
+    err = ConnInstance.Model(&model).Where("id in (?)",ids).Find(&res).Error
     if err != nil {
         Logf("get tags err","%v",err)
     }
@@ -43,6 +56,10 @@ func (model Tags) GetTagInfoByName(tagName string) (res Tags,err error){
 }
 
 
+
+
+
+
 func (model Tags) GetTagsInfo(tagsName []string)(res []Tags) {
     return
 }
@@ -60,7 +77,6 @@ func (model Tags) RemoveTagByName(tagName string) (affectRows int) {
  */
 func (model Tags) AddTag(tagName string) (id int,err error) {
     tags := new(Tags)
-    tags.RefCount = 0
     tags.TagName = tagName
     err = ConnInstance.Model(&model).Create(&tags).Error
     if err != nil {

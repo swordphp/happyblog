@@ -1,7 +1,7 @@
 package library
 
 import (
-	viper "github.com/spf13/viper"
+    viper "github.com/spf13/viper"
 )
 
 var config = viper.New()
@@ -14,18 +14,18 @@ var config = viper.New()
  * return: error
  */
 func ReadWebConfig()  (conf *map[string]string, err error){
-	tmpConf := make(map[string]string)
+    tmpConf := make(map[string]string)
 
-	config.AddConfigPath("./configs")     //设置读取的文件路径
-	config.SetConfigName("webconfig") //设置读取的文件名
-	config.SetConfigType("yaml")
-	if err := config.ReadInConfig(); err != nil {
-		panic(err)
-	}
-	for _,key  := range config.AllKeys() {
-		tmpConf[key] = config.GetString(key)
-	}
-	return &tmpConf,err
+    config.AddConfigPath("./configs")     //设置读取的文件路径
+    config.SetConfigName("webconfig") //设置读取的文件名
+    config.SetConfigType("yaml")
+    if err := config.ReadInConfig(); err != nil {
+        panic(err)
+    }
+    for _,key  := range config.AllKeys() {
+        tmpConf[key] = config.GetString(key)
+    }
+    return &tmpConf,err
 }
 
 /**
@@ -36,18 +36,18 @@ func ReadWebConfig()  (conf *map[string]string, err error){
  * return: error
  */
 func ReadLanguageConfig(language string) (conf *map[string]string,err error) {
-	tmpConf := make(map[string]string)
-	if language == "" {
-		language = "cn"
-	}
-	config.AddConfigPath("./configs/language")
-	config.SetConfigName(language)
-	config.SetConfigType("yaml")
-	if err := config.ReadInConfig(); err != nil {
-		panic(err)
-	}
-	tmpConf = config.GetStringMapString("menu")
-	return &tmpConf,err
+    tmpConf := make(map[string]string)
+    if language == "" {
+        language = "cn"
+    }
+    config.AddConfigPath("./configs/language")
+    config.SetConfigName(language)
+    config.SetConfigType("yaml")
+    if err := config.ReadInConfig(); err != nil {
+        panic(err)
+    }
+    tmpConf = config.GetStringMapString("menu")
+    return &tmpConf,err
 }
 
 

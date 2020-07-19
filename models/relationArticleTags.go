@@ -62,7 +62,7 @@ func (model RelationArticleTags) Relations(tagIds []int,articleId int) (affectRo
  * return: []RelationArticleTags
  */
 func (model RelationArticleTags) GetArticleTags(articleIds []int) (relations []RelationArticleTags) {
-    err := ConnInstance.Model(&model).Where("articleId in (?)" ,articleIds).Find(&relations).Error
+    err := ConnInstance.Debug().Model(&model).Where("articleId in (?)" ,articleIds).Find(&relations).Error
     if err != nil {
         Logf("get article relation error","%v",err)
     }

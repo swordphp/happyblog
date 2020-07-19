@@ -23,6 +23,7 @@ func init(){
     menu,_ := lib.ReadLanguageConfig(CArticle.webConf["language"])
     CArticle.menu = *menu
 }
+
 /**
  * 文章列表页面
  *
