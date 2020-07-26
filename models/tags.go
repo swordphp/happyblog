@@ -55,11 +55,6 @@ func (model Tags) GetTagInfoByName(tagName string) (res Tags,err error){
     return res,err
 }
 
-
-
-
-
-
 func (model Tags) GetTagsInfo(tagsName []string)(res []Tags) {
     return
 }

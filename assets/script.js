@@ -501,6 +501,14 @@
         })
     }();
 
+
+    const articleSetting = function(){
+        $(".setting,.settingsave").on("click",function(){
+            var settingPanle = $(".setting-body").toggle()
+        })
+    }();
+
+
     /**
      * 添加tag的方法
      */

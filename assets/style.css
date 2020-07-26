@@ -281,3 +281,22 @@ body {
     line-height: 28px;
     text-align: left;
 }
+
+
+.setting-body{
+    position: fixed;
+    right: 0;
+    width: 380px;
+    height: 100%;
+    padding:20px 10px 0px 10px;
+    text-align:left;
+    border-left: #337ab7 1px solid;
+    border-radius: 10px;
+    z-index: 999;
+    background: #edf0ff;
+    display:none;
+}
+
+#saveArticleSetting{
+    float:right;
+}
