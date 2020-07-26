@@ -22,7 +22,7 @@
 
     if ($(".article-view").length > 0) {
         //自动保存草稿
-        setInterval(autoSave, 10000);
+        // setInterval(autoSave, 10000);
 
     }
 
@@ -274,10 +274,30 @@
                 return false;
             }
             if (fileName == "") {
-                fileName = window.btoa(inputFile.name + inputFile.lastModified + inputFile.size).substring(0, 10)
+                fileName = inputFile.name
             }
-            uploadImg(inputFile, fileName);
+            var res = uploadImg(inputFile, fileName);
+            console.log(res);
+            let contentBox = $(".article-input-content");
+            var markDownStr = "![" + fileName + "](" + res.viewUrl + ") \n";
+            contentBox.val(contentBox.val() + markDownStr);
             $('#myModal').modal('hide');
+        });
+    }();
+    /**
+     * 上传文章头图
+     */
+    const headImageUpload = function(){
+        $("#headImageUpload").on("click", function (e) {
+            let inputFile = $('#headImage')[0].files[0];
+            if (inputFile == undefined) {
+                return false;
+            }
+            fileName = inputFile.name
+            var res = uploadImg(inputFile, fileName);
+            $(".pic-view").attr("src",res.viewUrl);
+            $("#headImageUrl").val(res.viewUrl);
+            // console.log(res);
         });
     }();
 
@@ -287,32 +307,30 @@
      * @param name
      */
     function uploadImg(file, name) {
+        var response;
         let data = new FormData();
         data.append("file", file);
         data.append("filename", name);
-        console.log(data);
-        console.log(file);
         $.ajax({
             type: "post",
             url: "/admin/api/upload",
             data: data,
             contentType: false,
+            async:false,
             //设置之后multipart/form-data
             processData: false,
             // 默认情况下会对发送的数据转化为对象 不需要转化的信息
             success: function (res) {
                 let obj = $(".save-notice");
-                let contentBox = $(".article-input-content")
-                let markDownStr;
                 if (res.errNo != 0) {
                     obj.removeClass("alert-info").addClass("alert-warning").html("上传错误" + res.errMsg).show(300).delay(3000).hide(300);
                 } else {
                     obj.removeClass("alert-warning").addClass("alert-info").html("上传成功").show(300).delay(3000).hide(300);
-                    markDownStr = "![" + name + "](" + res.viewUrl + ") \n";
-                    contentBox.val(contentBox.val() + markDownStr);
+                    response = res;
                 }
             },
         });
+        return response;
     }
 
     const changeSwitch = function () {

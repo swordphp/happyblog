@@ -2,6 +2,7 @@ package controller
 
 import (
     "bytes"
+    "crypto/md5"
     "fmt"
     "github.com/gin-gonic/gin"
     lib "happyblog/library"
@@ -37,6 +38,7 @@ func (ctrl AdminApiController) Upload(c *gin.Context){
     fileHandel ,_:= uploadFile.Open()
     defer fileHandel.Close()
     filename ,_:= c.GetPostForm("filename")
+    filename = fmt.Sprintf("%x", md5.Sum([]byte(filename)))
     extSlice := strings.Split(uploadFile.Filename,".")
     ext := strings.Join(extSlice[len(extSlice)-1:],"")
     filename = filename + "." + ext

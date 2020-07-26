@@ -300,3 +300,9 @@ body {
 #saveArticleSetting{
     float:right;
 }
+
+.pic-view{
+    width: 100%;
+    height: 100px;
+    margin-bottom: 10px;
+}
