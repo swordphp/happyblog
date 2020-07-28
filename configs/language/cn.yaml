@@ -19,6 +19,7 @@ menu:
   passwdph: "输入密码！"
   passwderr: "用户不存在或者密码错误."
 
+  setting: "设置"
   image: "图片"
   url: "链接"
   success: "成功"
@@ -30,9 +31,14 @@ menu:
   operate: "操作"
   public: "公开"
   private: "私有"
-
+  doit: "确定"
   add: "添加"
+  delete: "删除"
+  keywords: "关键字"
+  description: "简介"
+  userdefine: "自定义"
 
+  articlesettiing : "文章设置"
   articlenew: "新文章"
   articletitle: "文章标题"
   articlestatus: "状态"
@@ -57,6 +63,8 @@ menu:
   articletitleph: "在这里输入文章标题"
   articleinsert: "插入＋"
   articleinsertcontent: "插入内容"
+  articleheadimage: "头部图片"
+
 
   albumnew: "新专辑"
   albumedit: "编辑专辑"

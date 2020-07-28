@@ -15,6 +15,10 @@ type Article struct{
     AuthorInfo User `gorm:"foreignkey:authorId" json:"authorInfo"`
     AuthorId int `gorm:"column:authorId" json:"-"`
     IndependPage int8 `gorm:"column:independPage" json:"independPage"`
+    Describe string `gorm:"column:describe" json:"describe"`
+    Keywords string `gorm:"column:keywords" json:"keywords"`
+    Headimage string `gorm:"column:headimage" json:"headimage"`
+    Uri string `gorm:"column:uri" json:"uri"`
 }
 
 

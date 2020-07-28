@@ -112,6 +112,11 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
     articleModel.PubStatus = int8(pubStatus)
     articleModel.IndependPage = int8(independPage)
     articleModel.Title = c.DefaultPostForm("title","no title")
+    articleModel.Keywords = c.DefaultPostForm("keywords","")
+    articleModel.Describe = c.DefaultPostForm("describe","")
+    articleModel.Headimage = c.DefaultPostForm("headimage","")
+    articleModel.Uri = c.DefaultPostForm("uri","")
+
     albumId,_ := strconv.Atoi(c.PostForm("albumId"))
 
     albumModel := new(Album)

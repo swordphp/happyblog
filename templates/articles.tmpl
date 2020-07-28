@@ -68,14 +68,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title">删除确认</h4>
+                    <h4 class="modal-title">{{index .menu "delete"}}{{index .menu "doit"}}</h4>
                 </div>
                 <div class="modal-body">
                     <p>确定删除吗?此操作无法恢复!</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                    <button type="button" articleId=""  class="removeBtn btn btn-primary">确定</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">{{index .menu "cancel"}}</button>
+                    <button type="button" articleId=""  class="removeBtn btn btn-primary">{{index .menu "doit"}}</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -96,48 +96,48 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <div class="setting-body">
             <!-- 设置文章的一些属性-->
-            <h3 >设置文章属性</h3>
+            <h3 >{{index .menu "articlesettiing"}}</h3>
             <hr style="border-top:1px #767676 solid ;"/>
             <form >
                 <div class="form-group">
-                    <h4>设置文章头图</h4>
+                    <h4>{{index .menu "articleheadimage"}}</h4>
                 </div>
                 <div class="form-inline">
-                    <img class="pic-view" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9InllcyI/PjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgdmlld0JveD0iMCAwIDE0MCAxNDAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiPjwhLS0KU291cmNlIFVSTDogaG9sZGVyLmpzLzE0MHgxNDAKQ3JlYXRlZCB3aXRoIEhvbGRlci5qcyAyLjYuMC4KTGVhcm4gbW9yZSBhdCBodHRwOi8vaG9sZGVyanMuY29tCihjKSAyMDEyLTIwMTUgSXZhbiBNYWxvcGluc2t5IC0gaHR0cDovL2ltc2t5LmNvCi0tPjxkZWZzPjxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+PCFbQ0RBVEFbI2hvbGRlcl8xNzM4YjlkOThjZSB0ZXh0IHsgZmlsbDojQUFBQUFBO2ZvbnQtd2VpZ2h0OmJvbGQ7Zm9udC1mYW1pbHk6QXJpYWwsIEhlbHZldGljYSwgT3BlbiBTYW5zLCBzYW5zLXNlcmlmLCBtb25vc3BhY2U7Zm9udC1zaXplOjEwcHQgfSBdXT48L3N0eWxlPjwvZGVmcz48ZyBpZD0iaG9sZGVyXzE3MzhiOWQ5OGNlIj48cmVjdCB3aWR0aD0iMTQwIiBoZWlnaHQ9IjE0MCIgZmlsbD0iI0VFRUVFRSIvPjxnPjx0ZXh0IHg9IjQ0LjA1NDY4NzUiIHk9Ijc0LjU2MDkzNzUiPjE0MHgxNDA8L3RleHQ+PC9nPjwvZz48L3N2Zz4=" />
+                    <img class="pic-view" src="{{if eq $.articleInfo.Headimage ""}}data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAN0AAABMCAYAAADp/rL8AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAAEnQAABJ0Ad5mH3gAAAT/SURBVHhe7dk/jitFFMVhlgKI4Y3eRIiA6CUESESQIJGQIDLICIgISAgRKemTWAJLYB0sZfBpzbGO71Tb7R5zA+oXfJqZrj9dtu5xlXveeXh4eATQh9ABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQFR9+89Pju2//Wdx/+sWwz8irr75//ODnPx8fPvp42P5/pNd76b1y+/LeDNpnROiKPaHLMXc//nHSloW5JvtLzreX5vB8W9ZwySg0hG4fQlfs2ukOu9v7v/51HHf33S/HNkK3Pn5WU4ZOBeJi2KsW2es3nx3bFEAfMzOM2T8LNq9Lhq5ey+L1HBkwjxuF7qTw44NiWa+vF57vZOwTzyuEbjtCt9OoyFToWeyvP3lz7F+LLgu2fg90wJa2ci3n8Rx5T4/La+6XY+9++O3Yd02+TznWPK/71nY5N35WHC+LLPi1QtpK3+88Vx45a5s5KLmGvVZDdwj46N4jhO6/QeiKW4VOIfM8ol0v23Ucfe/3v0/6bLnflkKvPEb3y+OuaMfzTqsnsL7uI7L/vhS6PfKDYSaErrg2dLXwXJz5Ha/ucufonjnfS3j9XqN+3n/57bLT6UMgA5gfALleX/PrSvW1X4vQTeLWRV0LL4tT7eceUuyR93OoLvEYr02B065Wdz1R+BQG78y+nq/L9qwFhO5FstBqYV97n1q0ueNeq+4gXptCVoOm46UCJhkiyd3Pr2s0rxC67ThehtEDhq1HQxegi/OWodtS0Hm/tdDpp+f1a9U1X9fup5/un2vQtZwz5xVCtx2he6LvOi6gaktBuQCzOL17jApWbXmP2p4Ffy2NzblO1jZ4aDKy9LvwIGV0PL2kzjEjQneQDz1coJKF72JdUwtbO2Q+wVSRZ//8P1kNieS9b7nT5XVR+DVWY7Qm9cl+nnM01m3XqHPMaPrQ1aeMtdgdjuWByJngubDze5MKOncD3Ut9MyD63jSaN9dxrUuh8+96vdrhva4Rz1lDl69BR9Vsq9xPRu2zmTp0GbglVIdrNXQKhIOz9FkJngvbPF+9Rz1W3n/+9bO55Nk6Bn1ShuBc6HI9ldo1VmvSOjU223LOc7t45X4yap/NtKHL73AZplGxPwvOYGfI0NVwrhX68o/pmCPlOq51LnT6ezlSHoKlftql8iml+UPDf9fQ5RgHdI37yah9NvOF7hCG/JSux7tR6KQGp366Z1uGUr9nINf6VWvrWLN1p8vrJw7vgYKo90aB8xyeM8fmQ5hLR0txXxm1z2a60KmwXAB1R5JzxV6D56NhHhmP1w5982GJ1X9L6O9lzNM61gK6h4Nyizk917P3YMMHQvYftc9myuOljpZLEZXAyaUdRgHTWM1xcl0hO+wS+j3nMAXQxzD9HAVS4btFQMxBucWcniuP5Vt2Ocl5Ru2zmfpBysil0G2lUGkn1VFs7TuPrqtd/c59v3sph87BuYbfixyrD5jl78GH1ojnkFH7bAgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3QjNABzQgd0IzQAc0IHdCM0AHNCB3Q6uHxX5PCdpuBiMasAAAAAElFTkSuQmCC{{end}}" />
                     <div class="form-group">
-                        <input type="hidden" name="headimage" id="headImageUrl" value="" />
+                        <input type="hidden" name="headimage" id="headImageUrl" value="{{$.articleInfo.Headimage}}" />
                         <input name="headImage" id="headImage" type="file" >
                     </div>
                     <div class="form-group">
                         <button type="button" id="headImageUpload" class="btn btn-primary">{{index $.menu "add"}}</button>
                     </div>
                 </div>
-                <hr style="border-top:1px #767676 solid ;"/>
+                <hr class="hrline" />
                 <div class="form-group">
-                    <h4>关键字</h4>
-                    <input name="keywords" class="form-control" type="input" autocomplete="off" />
+                    <h4>{{index .menu "keywords"}}</h4>
+                    <input name="keywords" class="form-control keywords" value="{{$.articleInfo.Keywords}}" type="input" autocomplete="off" />
                 </div>
-                <hr style="border-top:1px #767676 solid ;"/>
+                <hr class="hrline" />
                 <div class="form-group">
-                    <h4>简介信息</h4>
-                    <textarea name="describe"  class="form-control" rows="5"></textarea>
+                    <h4>{{index .menu "description"}}</h4>
+                    <textarea name="describe"   class="describe form-control" rows="5">{{$.articleInfo.Describe}}</textarea>
                 </div>
-                <hr style="border-top:1px #767676 solid ;"/>
+                <hr class="hrline" />
                 <div class="form-group">
-                    <h4>自定义URI</h4>
-                    https://hostname/view/<input name="keywords" class="form-control" type="input" autocomplete="off" />
+                    <h4>{{index .menu "userdefine"}}URI</h4>
+                    https://{hostname}/view/<input name="uri" value="{{$.articleInfo.Uri}}" class="form-control uri"  type="input" autocomplete="off" />
                 </div>
-                <hr style="border-top:1px #767676 solid ;"/>
+                <hr class="hrline" />
                 <div class="form-group">
-                    <h4>独立页面</h4>
+                    <h4>{{index .menu "articletagsinglepage"}}</h4>
                     <div class="checkbox">
                         <label>
-                            <input type="checkbox" value="">
-                            以独立页面发布
+                            <input type="checkbox" value="1" {{if eq $.articleInfo.IndependPage 1}}checked{{end}}  name="single" id="single"/>
+                            {{index .menu "articlesavepublishedsinglepage"}}
                         </label>
                     </div>
                 </div>
-                <hr style="border-top:1px #767676 solid ;"/>
+                <hr class="hrline" />
                 <div class="form-group">
                     <button type="button" id="saveArticleSetting" class="settingsave btn btn-primary">{{index $.menu "save"}}</button>
                 </div>
@@ -169,7 +169,7 @@
             <input type="hidden" name="selectTags" id="tagsValue" value="{{$.relationTagsIds}}" />
             <input  style="width:320px" type="text" readonly class="form-control" id="tagsShow" name="tagsShow" placeholder="{{index $.menu "articletagsph"}}" value="{{$.relationTagsStr}}">
             <button type="button" data-toggle="modal" data-target="#tagModal" class="btn btn-info tag-btn">{{index $.menu "tagchoise"}}</button>
-            <button type="button" class="btn btn-primary tag-btn setting">设置</button>
+            <button type="button" class="btn btn-primary tag-btn setting">{{index .menu "setting"}}</button>
             <!--标签输入框-->
         </div>
         <div class="form-group">

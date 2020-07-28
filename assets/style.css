@@ -282,7 +282,6 @@ body {
     text-align: left;
 }
 
-
 .setting-body{
     position: fixed;
     right: 0;
@@ -305,4 +304,8 @@ body {
     width: 100%;
     height: 100px;
     margin-bottom: 10px;
+}
+
+.hrline{
+    border-top:1px #767676 solid ;
 }

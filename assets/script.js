@@ -407,27 +407,22 @@
 
     const pubClick = function () {
         $(".save-draft").on("click", function () {
-            saveArticle(1, 0);
+            var single = $("#single").prop('checked') ? 1 : 0;
+            console.log(single);
+            saveArticle(1, single);
             $('.alert-info').html("save success！").fadeIn(300).delay(3000).fadeOut(400);
         });
 
         $(".save-publish").on("click", function () {
             clearInterval(autoSaveHandle);
-            saveArticle(0, 0);
+            var single = $("#single").prop('checked') ? 1 : 0;
+            console.log(single);
+            saveArticle(0, single);
             $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(300).fadeOut(100, function () {
-                window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
+                // window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
             });
 
         });
-
-        $(".save-publish-single").on("click", function () {
-            clearInterval(autoSaveHandle);
-            saveArticle(0, 1);
-            $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(300).fadeOut(100, function () {
-                window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
-            });
-        });
-
     }();
 
     const tagSelect = function (){
@@ -467,8 +462,11 @@
     }();
 
 
-
-
+    /**
+     * 保存文章
+     * @param draft
+     * @param single
+     */
     function saveArticle(draft = 1, single = 0) {
         var data = new Object();
         data['content'] = $(".article-input-content").val();
@@ -480,6 +478,10 @@
         data['pubStatus'] = $(".pubStatus").val();
         data['albumId'] = $(".albumId").val();
         data['tags'] = $("#tagsValue").val();
+        data['keywords'] = $(".keywords").val();
+        data['describe'] = $(".describe").val();
+        data['headimage'] = $("#headImageUrl").val();
+        data['uri'] = $(".uri").val();
         if (draft == 1) {
             //存草稿
             data['pubStatus'] = 0;
@@ -489,7 +491,11 @@
         if (single == 1) {
             //独立页面
             data['independPage'] = 1;
+        } else{
+            //非独立页面
+            data['independPage'] = 2;
         }
+        console.log(data);
         $.post({
             url: "/admin/api/articlesave",
             data: data,

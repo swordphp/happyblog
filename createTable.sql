@@ -2,9 +2,7 @@
 SQLyog 
 MySQL - 10.3.22-MariaDB-0+deb10u1 : Database - happyblog
 *********************************************************************
-*/
-
-
+*/
 
 /*!40101 SET NAMES utf8 */;
 
@@ -40,16 +38,16 @@ CREATE TABLE `happyblog_tblAlbumRe` (
 CREATE TABLE `happyblog_tblArticle` (
   `id` bigint(32) NOT NULL AUTO_INCREMENT COMMENT 'the index key',
   `title` varchar(100) NOT NULL COMMENT 'the article title',
-  `content` text DEFAULT NULL COMMENT 'content',
+  `content` longtext DEFAULT NULL COMMENT 'content',
   `pubStatus` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'publish status',
   `createTime` datetime DEFAULT NULL COMMENT 'create time',
   `updateTime` datetime DEFAULT NULL COMMENT 'update tim',
   `authorId` int(10) DEFAULT NULL COMMENT 'author id',
-  `independPage` tinyint(1) DEFAULT 0 COMMENT 'wheather page independ',
-  `describe` varchar(100) NOT NULL DEFAULT '""' COMMENT 'article describe info',
-  `keywords` varchar(50) NOT NULL DEFAULT '""' COMMENT 'article key words',
-  `headimage` varchar(200) DEFAULT '""' COMMENT 'article head image',
-  `uri` varchar(100) NOT NULL DEFAULT '""' COMMENT 'user define uri',
+  `independPage` tinyint(1) DEFAULT 2 COMMENT 'wheather page independ',
+  `describe` varchar(100) DEFAULT NULL COMMENT 'article describe info',
+  `keywords` varchar(50) DEFAULT NULL COMMENT 'article key words',
+  `headimage` varchar(200) DEFAULT NULL COMMENT 'article head image',
+  `uri` varchar(100) DEFAULT NULL COMMENT 'user define uri',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8;
 
