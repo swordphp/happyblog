@@ -113,7 +113,11 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
     articleModel.IndependPage = int8(independPage)
     articleModel.Title = c.DefaultPostForm("title","no title")
     articleModel.Keywords = c.DefaultPostForm("keywords","")
-    articleModel.Describe = c.DefaultPostForm("describe","")
+    articleModel.Brief = c.DefaultPostForm("describe","")
+    if articleModel.Brief == "" {
+        //如果简介信息为空,将内容前200字截取为简介
+        articleModel.Brief = articleModel.Content[0:200]
+    }
     articleModel.Headimage = c.DefaultPostForm("headimage","")
     articleModel.Uri = c.DefaultPostForm("uri","")
 

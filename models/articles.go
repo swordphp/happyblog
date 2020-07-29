@@ -8,17 +8,17 @@ import (
 type Article struct{
     Id int `gorm:"primary_key" json:"id"`
     Title string `gorm:"column:title" json:"title"`
-    Content string `gorm:"column:content" json:"content"`
-    PubStatus int8 `gorm:"column:pubStatus" json:"pubStatus"`
+    Content string `gorm:"column:content" json:"content,omitempty"`
+    PubStatus int8 `gorm:"column:pubStatus" json:"pubStatus,omitempty"`
     CreateTime time.Time `gorm:"column:createTime"   json:"createTime"`
     UpdateTime time.Time `gorm:"column:updateTime"  json:"updateTime"`
     AuthorInfo User `gorm:"foreignkey:authorId" json:"authorInfo"`
     AuthorId int `gorm:"column:authorId" json:"-"`
     IndependPage int8 `gorm:"column:independPage" json:"independPage"`
-    Describe string `gorm:"column:describe" json:"describe"`
+    Brief string `gorm:"column:brief" json:"brief"`
     Keywords string `gorm:"column:keywords" json:"keywords"`
     Headimage string `gorm:"column:headimage" json:"headimage"`
-    Uri string `gorm:"column:uri" json:"uri"`
+    Uri string `gorm:"column:uri" json:"uri,omitempty"`
 }
 
 
@@ -64,7 +64,12 @@ func (Article) GetArticleListView(page int) (rows []Article,err error) {
     } else {
         limitStart = (page-1) *perPage
     }
-    err = ConnInstance.Debug().Preload("AuthorInfo").Where("pubStatus = ? and independPage <> ?",1,1).Order("updateTime DESC").Offset(limitStart).Limit(perPage).Find(&rows).Error
+    err = ConnInstance.Select("title,createTime,updateTime,authorId,brief,keywords,headimage").
+        Preload("AuthorInfo").
+        Where("pubStatus = ? and independPage <> ?",1,1).
+        Order("updateTime DESC").
+        Offset(limitStart).Limit(perPage).
+        Find(&rows).Error
     if err != nil{
         return nil ,err
     }

@@ -59,7 +59,6 @@ func (ArticleApi) ArticleList(c *gin.Context) {
     } else {
         render.SetErr(500,"get article list from db  error")
     }
-    fmt.Println(articleList)
     c.JSON(http.StatusOK,render)
 }
 

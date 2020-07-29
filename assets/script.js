@@ -479,7 +479,7 @@
         data['albumId'] = $(".albumId").val();
         data['tags'] = $("#tagsValue").val();
         data['keywords'] = $(".keywords").val();
-        data['describe'] = $(".describe").val();
+        data['brief'] = $(".describe").val();
         data['headimage'] = $("#headImageUrl").val();
         data['uri'] = $(".uri").val();
         if (draft == 1) {
