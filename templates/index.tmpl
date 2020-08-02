@@ -58,6 +58,7 @@
             <li role="presentation" {{if .albums}}class="active"{{end}}><a href="/admin/albums">{{index .menu "albums"}}</a></li>
 {{/*            <li role="presentation" {{if .tags}}class="active"{{end}}><a href="/admin/tags">{{index .menu "tags"}}</a></li>*/}}
             <li role="presentation" {{if .users}}class="active"{{end}}><a href="/admin/users">{{index .menu "users"}}</a></li>
+            <li role="presentation" {{if .setting}}class="active"{{end}}><a href="/admin/setting">{{index .menu "website"}}{{index .menu "setting"}}</a></li>
 {{/*            <li role="presentation"><a href="/admin/logout">{{index .menu "logout"}}</a></li>*/}}
         </ul>
     </row>
@@ -76,6 +77,9 @@
         {{end}}
         {{if .users}}
             {{template "users" .}}
+        {{end}}
+        {{if .setting}}
+            {{template "setting" .}}
         {{end}}
         {{if .articleEdit}}
             {{template "articleedit" .}}

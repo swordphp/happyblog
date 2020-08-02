@@ -125,7 +125,10 @@
                 <hr class="hrline" />
                 <div class="form-group">
                     <h4>{{index .menu "userdefine"}}URI</h4>
-                    https://{hostname}/view/<input name="uri" value="{{$.articleInfo.Uri}}" class="form-control uri"  type="input" autocomplete="off" />
+                    <div class="input-group" >
+                    <span class="input-group-addon" id="basic-addon3"> https://{hostname}/view/</span>
+                   <input name="uri" value="{{$.articleInfo.Uri}}" class="form-control uri"  type="input" autocomplete="off" />
+                    </div>
                 </div>
                 <hr class="hrline" />
                 <div class="form-group">

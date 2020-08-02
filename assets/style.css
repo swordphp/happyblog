@@ -309,3 +309,13 @@ body {
 .hrline{
     border-top:1px #767676 solid ;
 }
+#notice-box{
+
+    width: 50%;
+    display: inline-block;
+    display: none;
+    float: left;
+    height: 30px;
+    line-height: 30px;
+    padding: 0 20px;
+}

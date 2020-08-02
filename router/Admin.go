@@ -27,7 +27,8 @@ func AdminRouter (router *gin.Engine) {
         adminGroup.GET("/article/edit/:id", CArticle.ArticleEdit)
 
         //标签管理相关路由
-        adminGroup.GET("/tags", CTags.Tags)
+        adminGroup.GET("/users", CUsers.Users)
+        adminGroup.GET("/setting", CSetting.Settings)
 
         //专辑管理相关路由
         adminGroup.GET("/albums", CAlbums.Albums)
@@ -35,13 +36,20 @@ func AdminRouter (router *gin.Engine) {
         adminGroup.POST("/albums/save", CAlbums.AlbumsSaveInfo)
 
         //用户管理相关路由
-        adminGroup.GET("/users", CUsers.Users)
+
 
 
         //管理后台使用的一些接口
         adminGroup.POST("/api/upload",CAdminApi.Upload)
+
         adminGroup.POST("/api/articlesave",CAdminApi.ArticleSave)
         adminGroup.GET("/api/articleremove",CAdminApi.ArticleRemove)
+
         adminGroup.POST("/api/tagadd",CAdminApi.TagAdd)
+
+        adminGroup.GET("/api/settingremove",CAdminApi.SettingRemove)
+        adminGroup.GET("/api/getsettinginfo",CAdminApi.GetSettingInfo)//获取配置项信息
+        adminGroup.POST("/api/settingadd",CAdminApi.SettingAdd)
+        adminGroup.POST("/api/settingsave",CAdminApi.SettingSave)
     }
 }

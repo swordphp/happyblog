@@ -29,6 +29,45 @@ func init(){
 
 
 /**
+ * 获取指定的配置项信息
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) GetSettingInfo(c *gin.Context) {
+    settingId ,_ := strconv.Atoi(c.DefaultQuery("id","0"))
+    settingModel := new(Setting)
+    infos,_ := settingModel.GetConfigInfo(settingId)
+    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","data":infos})
+}
+
+/**
+ * 添加配置组信息
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) SettingGroupAdd(c *gin.Context) {
+
+}
+
+/**
+ * 添加新的配置信息
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) SettingAdd(c *gin.Context) {
+
+}
+
+/**
+ * 修改已有的配置信息
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) SettingSave(c *gin.Context) {
+
+}
+
+
+/**
  * 上传文件
  *
  * param: *gin.Context c
@@ -77,7 +116,18 @@ func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
     }
     c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","affectRows":rowAffect})
 }
-
+/**
+ * 根据传递的ID
+ * 来移除一行设置行
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) SettingRemove(c *gin.Context) {
+    settingId ,_ := strconv.Atoi(c.DefaultQuery("id","0"))
+    settingModel := new(Setting)
+    rowAffect := settingModel.RemoveRow(settingId)
+    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","affectRows":rowAffect})
+}
 
 /**
  * 添加标签的方法

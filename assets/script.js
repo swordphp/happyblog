@@ -1,5 +1,15 @@
 (function () {
 
+    /**
+     * 做了一些初始化的工作
+     */
+    $(function () {
+        $('[data-toggle="popover"]').popover();
+        $(".configType").load();
+        $(".currentGroup").val($(".settingNav.active").attr("configgroup"));
+    });
+
+
     let autoSaveHandle;
     const autoSave = function () {
         saveArticle(1, 0);
@@ -285,6 +295,60 @@
         });
     }();
     /**
+     * 设置的页面中用于上传图片
+     * 的方法,上传图片到云存储,
+     * 关闭模态框,并回写图片地址
+     */
+    const settingUpload = function(){
+        $("#setImageUpload").on("click", function (e) {
+            let inputFile = $('#inputFile')[0].files[0];
+            let fileName = $('#fileName').val();
+            if (inputFile == undefined) {
+                return false;
+            }
+            if (fileName == "") {
+                fileName = inputFile.name
+            }
+            var res = uploadImg(inputFile, fileName);
+            console.log(res);
+            let urlBox = $(".configValue");
+            urlBox.val(res.viewUrl);
+            $('#settingModal').modal('hide');
+        });
+    }();
+    /**
+     * 管理设置面板中的上传图片按钮的显示和隐藏
+     */
+    const showUploadImage = function(){
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+            $(".currentGroup").val($(e.target).attr("configGroup"));
+        });
+        $(".configType").on("change load",function(){
+            if($(this).val() == "image") {
+                $(".imageUploadShow").show();
+            } else {
+                $(".imageUploadShow").hide();
+            }
+        })
+    }();
+    /**
+     * 删除设置的方法
+     */
+    const removeSetting = function(){
+        $(".settingRemove").on("click",function(){
+            $(".removeBtn").attr("settingId",$(this).attr("removeId"));
+        });
+        $(".removeBtn").on("click",function(){
+            $.get({
+                url: "/admin/api/settingremove?id="+$(this).attr("articleid"),
+                success: function (res) {
+                    $('#remove').modal('hide');
+                    window.location.reload();
+                },
+            });
+        })
+    }();
+    /**
      * 上传文章头图
      */
     const headImageUpload = function(){
@@ -333,6 +397,9 @@
         return response;
     }
 
+    /**
+     *
+     */
     const changeSwitch = function () {
         $(".albums-select").on("click", function (e) {
             if (!$(this).hasClass("btn-primary")) {
@@ -377,6 +444,9 @@
         });
     }();
 
+    /**
+     * 编辑专辑信息
+     */
     const editAlbum = function () {
         $(".editAlbum").on("click", function (e) {
             $(".albums-notice").hide();
@@ -404,7 +474,9 @@
             });
         });
     }();
-
+    /**
+     * 文章发布的流程
+     */
     const pubClick = function () {
         $(".save-draft").on("click", function () {
             var single = $("#single").prop('checked') ? 1 : 0;
@@ -419,12 +491,14 @@
             console.log(single);
             saveArticle(0, single);
             $('.alert-info').html("publish success! return to article list。").fadeIn(300).delay(300).fadeOut(100, function () {
-                // window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
+                window.location.href = "/admin/articles?obstring=mtime&obstatus=desc";
             });
 
         });
     }();
-
+    /**
+     * 选择文章标签
+     */
     const tagSelect = function (){
         $(document).on("ready",function(){
             var currentTagsIdStr = $("#tagsValue").val();
@@ -526,6 +600,11 @@
     }();
 
 
+
+    /**
+     * 打开或者关闭文章编辑的面板
+     * 用于设置文章的一些额外属性
+     */
     const articleSetting = function(){
         $(".setting,.settingsave").on("click",function(){
             var settingPanle = $(".setting-body").toggle()
