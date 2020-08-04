@@ -11,6 +11,19 @@ MySQL - 10.3.22-MariaDB-0+deb10u1 : Database - happyblog
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+/*Table structure for table `happyblog_settings` */
+
+CREATE TABLE `happyblog_settings` (
+  `id` bigint(32) NOT NULL AUTO_INCREMENT COMMENT 'index',
+  `configGroup` varchar(20) NOT NULL,
+  `configName` varchar(20) NOT NULL,
+  `configValue` varchar(100) NOT NULL,
+  `configOrder` int(10) NOT NULL DEFAULT 1,
+  `configType` enum('string','image') NOT NULL DEFAULT 'string',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `group_configKey` (`configGroup`,`configName`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+
 /*Table structure for table `happyblog_tblAlbum` */
 
 CREATE TABLE `happyblog_tblAlbum` (
@@ -44,7 +57,7 @@ CREATE TABLE `happyblog_tblArticle` (
   `updateTime` datetime DEFAULT NULL COMMENT 'update tim',
   `authorId` int(10) DEFAULT NULL COMMENT 'author id',
   `independPage` tinyint(1) DEFAULT 2 COMMENT 'wheather page independ',
-  `describe` varchar(100) DEFAULT NULL COMMENT 'article describe info',
+  `brief` varchar(100) DEFAULT NULL COMMENT 'article describe info',
   `keywords` varchar(50) DEFAULT NULL COMMENT 'article key words',
   `headimage` varchar(200) DEFAULT NULL COMMENT 'article head image',
   `uri` varchar(100) DEFAULT NULL COMMENT 'user define uri',
