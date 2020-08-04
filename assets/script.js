@@ -233,7 +233,7 @@
         $(".article-input-content").height(bodyHeight - 71 - 100 - 60);
         $(".article-view").height(bodyHeight - 71 - 100 - 60 - 8);
         let totalrows = $(".articles-content-tbody").children().length;
-        listHeight = (4.8 * totalrows) + "%";
+        let listHeight = (4.8 * totalrows) + "%";
         $(".articles-list").height(listHeight)
 
     }();
@@ -306,7 +306,7 @@
      * 的方法,上传图片到云存储,
      * 关闭模态框,并回写图片地址
      */
-    const settingUpload = function(){
+    const settingUpload = function () {
         $("#setImageUpload").on("click", function (e) {
             let inputFile = $('#inputFile')[0].files[0];
             let fileName = $('#fileName').val();
@@ -316,8 +316,7 @@
             if (fileName == "") {
                 fileName = inputFile.name
             }
-            var res = uploadImg(inputFile, fileName);
-            console.log(res);
+            let res = uploadImg(inputFile, fileName);
             let urlBox = $(".configValue");
             urlBox.val(res.viewUrl);
             $('#settingModal').modal('hide');
@@ -326,12 +325,12 @@
     /**
      * 管理设置面板中的上传图片按钮的显示和隐藏
      */
-    const showUploadImage = function(){
+    const showUploadImage = function () {
         $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
             $(".currentGroup").val($(e.target).attr("configGroup"));
         });
-        $(".configType").on("change load",function(){
-            if($(this).val() == "image") {
+        $(".configType").on("change load", function () {
+            if ($(this).val() == "image") {
                 $(".imageUploadShow").show();
             } else {
                 $(".imageUploadShow").hide();
@@ -341,13 +340,13 @@
     /**
      * 删除设置的方法
      */
-    const removeSetting = function(){
-        $(".settingRemove").on("click",function(){
-            $(".removeBtn").attr("settingId",$(this).attr("removeId"));
+    const removeSetting = function () {
+        $(".settingRemove").on("click", function () {
+            $(".removeBtn").attr("settingId", $(this).attr("removeId"));
         });
-        $(".removeBtn").on("click",function(){
+        $(".removeBtn").on("click", function () {
             $.get({
-                url: "/admin/api/settingremove?id="+$(this).attr("articleid"),
+                url: "/admin/api/settingremove?id=" + $(this).attr("articleid"),
                 success: function (res) {
                     $('#remove').modal('hide');
                     window.location.reload();
@@ -358,7 +357,7 @@
     /**
      * 上传文章头图
      */
-    const headImageUpload = function(){
+    const headImageUpload = function () {
         $("#headImageUpload").on("click", function (e) {
             let inputFile = $('#headImage')[0].files[0];
             if (inputFile == undefined) {
@@ -366,7 +365,7 @@
             }
             fileName = inputFile.name
             var res = uploadImg(inputFile, fileName);
-            $(".pic-view").attr("src",res.viewUrl);
+            $(".pic-view").attr("src", res.viewUrl);
             $("#headImageUrl").val(res.viewUrl);
             // console.log(res);
         });
@@ -375,23 +374,23 @@
     /**
      * 编辑配置项
      */
-    const editSettingClick = function(){
-        $(".settingEdit").on("click",function(){
-            if($(".configType").val() == "image") {
-                console.log(123123123);
-                $(".imageUploadShow").show();
-            } else {
-                $(".imageUploadShow").hide();
-            }
+    const editSettingClick = function () {
+        $(".settingEdit").on("click", function () {
+
             let settingId = $(this).attr("data-id");
-            $(".saveSetting").attr("data-id",settingId).show();
+            $(".saveSetting").attr("data-id", settingId).show();
             $("[method=create].saveSetting").hide();
-            getSettingInfo(settingId,function(data){
+            getSettingInfo(settingId, function (data) {
                 //将服务器的返回信息设置到表单中,用于用户来修改.
                 $(".configName").val(data.configName);
                 $(".configValue").val(data.configValue);
                 $(".configType").val(data.type);
                 $(".configOrder").val(data.order);
+                if ($(".configType").val() === "image") {
+                    $(".imageUploadShow").show();
+                } else {
+                    $(".imageUploadShow").hide();
+                }
             });
         });
     }();
@@ -399,33 +398,34 @@
      * 保存或者创建按钮被点击的事件.
      *
      */
-    const saveSettingClick = function(){
-        $(".saveSetting").on("click",function(){
+    const saveSettingClick = function () {
+        $(".saveSetting").on("click", function () {
             let data = $("#settingForm").serialize();
             let method = $(this).attr("method");
-           if(method == "update") {
-               data = data + "&id=" + $(this).attr("data-id");
-           }
-           saveSetting(method,data,function(data){
-               //保存或者创建返回的数据.
-               window.location.reload();
-           })
+            if (method == "update") {
+                data = data + "&id=" + $(this).attr("data-id");
+            }
+            saveSetting(method, data, function (data) {
+                //保存或者创建返回的数据.
+                window.location.reload();
+            })
         });
     }();
+
     /**
      *
      * @param method
      * @param data
      * @param callback 保存成功的回调函数
      */
-    function saveSetting (method,data,callback){
+    function saveSetting(method, data, callback) {
         var url = "";
         if (method == undefined || method == "") {
             return false;
         }
         if (method == "create") {
             url = "/admin/api/settingadd";
-        } else if(method == "update") {
+        } else if (method == "update") {
             url = "/admin/api/settingsave";
         } else {
             return false;
@@ -436,7 +436,7 @@
             url: url,
             data: data,
             success: function (res) {
-                if(res.errNo == 0) {
+                if (res.errNo == 0) {
                     callback(res.data);
                 }
             },
@@ -452,21 +452,22 @@
      * @param callback
      * @returns {boolean}
      */
-    function getSettingInfo(id,callback) {
-        if(id == 0 || id == undefined) {
+    function getSettingInfo(id, callback) {
+        if (id == 0 || id == undefined) {
             return false
         }
         $.ajax({
             type: "get",
-            url: "/admin/api/getsettinginfo?id="+id,
+            url: "/admin/api/getsettinginfo?id=" + id,
             contentType: false,
             success: function (res) {
-                if(res.errNo == 0) {
+                if (res.errNo == 0) {
                     callback(res.data)
                 }
             },
         });
     }
+
     /**
      * file 为文件对象
      * @param file
@@ -482,7 +483,7 @@
             url: "/admin/api/upload",
             data: data,
             contentType: false,
-            async:false,
+            async: false,
             //设置之后multipart/form-data
             processData: false,
             // 默认情况下会对发送的数据转化为对象 不需要转化的信息
@@ -601,34 +602,34 @@
     /**
      * 选择文章标签
      */
-    const tagSelect = function (){
-        $(document).on("ready",function(){
+    const tagSelect = function () {
+        $(document).on("ready", function () {
             var currentTagsIdStr = $("#tagsValue").val();
             if (currentTagsIdStr != undefined) {
                 var currentTags = currentTagsIdStr.split(",")
             }
-            $(".tag-content").children().each(function(){
-               var id = $(this).attr("tagId");
-               if ($.inArray(id,currentTags) != -1) {
-                   $(this).toggleClass("label-primary").toggleClass("label-default");
-               }
+            $(".tag-content").children().each(function () {
+                var id = $(this).attr("tagId");
+                if ($.inArray(id, currentTags) != -1) {
+                    $(this).toggleClass("label-primary").toggleClass("label-default");
+                }
             });
         });
         let selectedCount = 0;
-        $(document).on("click",".tag-label",function(e){
-            if ($(".tag-content").children(".label-primary").length <= (4-selectedCount)){
+        $(document).on("click", ".tag-label", function (e) {
+            if ($(".tag-content").children(".label-primary").length <= (4 - selectedCount)) {
                 //可以继续选择的情况
                 $(this).toggleClass("label-primary").toggleClass("label-default");
 
-            } else if($(this).hasClass("label-primary")) {
+            } else if ($(this).hasClass("label-primary")) {
                 //已经超过5个标签了
                 $(this).toggleClass("label-primary").toggleClass("label-default");
             }
         });
-        $(".saveTags").on("click",function(){
+        $(".saveTags").on("click", function () {
             var tagsValues = Array();
             var tagsString = Array();
-            $(".tag-content").children(".label-primary").each(function(){
+            $(".tag-content").children(".label-primary").each(function () {
                 tagsValues.push($(this).attr("tagId"));
                 tagsString.push($(this).html());
             });
@@ -647,7 +648,7 @@
         var data = new Object();
         data['content'] = $(".article-input-content").val();
         data['title'] = $(".title-input").val();
-        if(data['title'] == "") {
+        if (data['title'] == "") {
             data['title'] = "temp article";
         }
         data['id'] = $(".articleId").val();
@@ -667,7 +668,7 @@
         if (single == 1) {
             //独立页面
             data['independPage'] = 1;
-        } else{
+        } else {
             //非独立页面
             data['independPage'] = 2;
         }
@@ -684,14 +685,14 @@
     /**
      * 删除文章的方法
      */
-    const removeArticle = function(){
-        $(".articleRemove").on("click",function(){
+    const removeArticle = function () {
+        $(".articleRemove").on("click", function () {
             console.log($(this).attr("removeId"));
-            $(".removeBtn").attr("articleid",$(this).attr("removeId"));
+            $(".removeBtn").attr("articleid", $(this).attr("removeId"));
         });
-        $(".removeBtn").on("click",function(){
+        $(".removeBtn").on("click", function () {
             $.get({
-                url: "/admin/api/articleremove?id="+$(this).attr("articleid"),
+                url: "/admin/api/articleremove?id=" + $(this).attr("articleid"),
                 success: function (res) {
                     console.log(res);
                     $('#remove').modal('hide');
@@ -702,13 +703,12 @@
     }();
 
 
-
     /**
      * 打开或者关闭文章编辑的面板
      * 用于设置文章的一些额外属性
      */
-    const articleSetting = function(){
-        $(".setting,.settingsave").on("click",function(){
+    const articleSetting = function () {
+        $(".setting,.settingsave").on("click", function () {
             var settingPanle = $(".setting-body").toggle()
         })
     }();
@@ -717,15 +717,15 @@
     /**
      * 添加tag的方法
      */
-    const tagAdd = function(){
-        $(".tagInputs").on("submit",function(){
+    const tagAdd = function () {
+        $(".tagInputs").on("submit", function () {
             var tagName = $("#newTagName").val();
             console.log(tagName)
             //添加的标签不能为空
             if (tagName == "" || tagName == undefined) {
                 return false;
             }
-            $(".tag-content").children().each(function(){
+            $(".tag-content").children().each(function () {
                 //不能添加已有标签
                 if (tagName == $(this).html()) {
                     return false;
@@ -733,9 +733,9 @@
             });
             $.post({
                 url: "/admin/api/tagadd",
-                data: {"tagName":tagName},
+                data: {"tagName": tagName},
                 success: function (res) {
-                    tagInfo = $('<span class="label label-default tag-label" tagId="'+res.data.tagId+'">'+res.data.tagName+'</span>');
+                    tagInfo = $('<span class="label label-default tag-label" tagId="' + res.data.tagId + '">' + res.data.tagName + '</span>');
                     $(".tag-content").append(tagInfo);
                     $("#newTagName").val("");
                 },
