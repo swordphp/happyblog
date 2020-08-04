@@ -36,15 +36,14 @@
                         <tbody>
                         {{range $inrow := $infos}}
                             <tr>
-                                <td>{{$inrow.BelongGroup}}</td>
+                                <td>{{$inrow.ConfigGroup}}</td>
                                 <td >{{$inrow.ConfigName}}</td>
                                 {{if eq $inrow.ConfigType "string"}}
                                 <td >{{$inrow.ConfigValue}}</td>
                                 {{end}}
                                 {{if eq $inrow.ConfigType "image"}}
                                 <td >
-                                    {{$inrow.ConfigName}}
-                                    <button type="button" class="btn btn-info btn-xs" data-container="body" data-toggle="popover" data-placement="top" data-html="true" data-content="<img src='{{$inrow.configValue}}'  class='img-thumbnail'>">
+                                    <button type="button" class="btn btn-info btn-xs" data-container="body" data-toggle="popover" data-placement="top" data-html="true" data-content="<img src='{{$inrow.ConfigValue}}'  class='img-thumbnail'>">
                                         {{index $.menu "preview"}}{{index $.menu "image"}}
                                     </button>
                                 </td>
@@ -52,7 +51,7 @@
                                 <td >{{$inrow.ConfigType}}</td>
                                 <td >{{$inrow.ConfigOrder}}</td>
                                 <td >
-                                    <button  class="btn btn-info btn-xs" data-id="{{$inrow.Id}}" >{{index $.menu "edit"}}</button>
+                                    <button  class="btn btn-info btn-xs settingEdit" data-id="{{$inrow.Id}}" >{{index $.menu "edit"}}</button>
                                     <button  class="btn btn-danger btn-xs settingRemove" removeId="{{$inrow.Id}}" >{{index $.menu "delete"}}</button>
                                 </td>
                             </tr>
@@ -62,11 +61,11 @@
                 </div>
                 {{end}}
                 <hr />
-                <form class="form-inline">
+                <form class="form-inline" id="settingForm">
                     <input type="hidden" name="ConfigGroup" class="currentGroup" value="" />
                     <div class="form-group">
                         <label for="configName">{{index $.menu "named"}}:</label>
-                        <input type="text" class="form-control configName" name="ConfigName" placeholder="configName">
+                        <input type="text" class="form-control configName"  name="ConfigName" placeholder="configName">
                     </div>
                     <div class="form-group">
                         <label for="configValue">{{index $.menu "value"}}:</label>
@@ -83,10 +82,10 @@
                     </div>
                     <div class="form-group">
                         <label for="configOrder">{{index $.menu "order"}}</label>
-                        <input type="text" class="form-control" id="configOrder" name="ConfigOrder" style="width:120px" placeholder="configOrder">
+                        <input type="text" class="form-control configOrder" value="1"  name="ConfigOrder" style="width:120px" placeholder="configOrder" >
                     </div>
-                    <button  class="btn btn-primary btn-sm addSetting">{{index $.menu  "add"}}</button>
-                    <button  class="btn btn-primary btn-sm saveSetting" style="display: none">{{index $.menu  "save"}}</button>
+                    <button type="button"  class="btn btn-primary btn-sm saveSetting" method="create">{{index $.menu  "add"}}</button>
+                    <button type="button"  class="btn btn-primary btn-sm saveSetting" method="update" data-id="" style="display: none">{{index $.menu  "save"}}</button>
                 </form>
             </div>
         </div>

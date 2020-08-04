@@ -37,7 +37,7 @@
     }
 
 
-    //打开或者关闭预览
+    //打开或者关闭文章预览
     const swichPerview = function () {
         $("#viewSwitch").click(function () {
             if ($(".markdown-content").hasClass("full-width")) {
@@ -75,7 +75,9 @@
             window.location.href = path;
         })
     }();
-
+    /**
+     * 绘制文章内的分页列表
+     */
     const drawNav = function () {
         let totalRows = $(".page-nav").attr("totalRows") * 1;
         let curPage = $(".page-nav").attr("curPage") * 1;
@@ -211,6 +213,9 @@
         }
     }
 
+    /**
+     * 捕获Ctrl+i按钮
+     */
     const CtriI = function () {
         //捕获  ctrl+i 操作
         $(window).keydown(function (e) {
@@ -233,7 +238,9 @@
 
     }();
 
-    //获取剪贴板中的图片
+    /**
+     * 获取剪贴板中的图片
+     */
     const getPasteImg = function () {
         document.addEventListener('paste', function (event) {
             const items = event.clipboardData && event.clipboardData.items;
@@ -365,6 +372,101 @@
         });
     }();
 
+    /**
+     * 编辑配置项
+     */
+    const editSettingClick = function(){
+        $(".settingEdit").on("click",function(){
+            if($(".configType").val() == "image") {
+                console.log(123123123);
+                $(".imageUploadShow").show();
+            } else {
+                $(".imageUploadShow").hide();
+            }
+            let settingId = $(this).attr("data-id");
+            $(".saveSetting").attr("data-id",settingId).show();
+            $("[method=create].saveSetting").hide();
+            getSettingInfo(settingId,function(data){
+                //将服务器的返回信息设置到表单中,用于用户来修改.
+                $(".configName").val(data.configName);
+                $(".configValue").val(data.configValue);
+                $(".configType").val(data.type);
+                $(".configOrder").val(data.order);
+            });
+        });
+    }();
+    /**
+     * 保存或者创建按钮被点击的事件.
+     *
+     */
+    const saveSettingClick = function(){
+        $(".saveSetting").on("click",function(){
+            let data = $("#settingForm").serialize();
+            let method = $(this).attr("method");
+           if(method == "update") {
+               data = data + "&id=" + $(this).attr("data-id");
+           }
+           saveSetting(method,data,function(data){
+               //保存或者创建返回的数据.
+               window.location.reload();
+           })
+        });
+    }();
+    /**
+     *
+     * @param method
+     * @param data
+     * @param callback 保存成功的回调函数
+     */
+    function saveSetting (method,data,callback){
+        var url = "";
+        if (method == undefined || method == "") {
+            return false;
+        }
+        if (method == "create") {
+            url = "/admin/api/settingadd";
+        } else if(method == "update") {
+            url = "/admin/api/settingsave";
+        } else {
+            return false;
+        }
+        console.log(data);
+        $.ajax({
+            type: "post",
+            url: url,
+            data: data,
+            success: function (res) {
+                if(res.errNo == 0) {
+                    callback(res.data);
+                }
+            },
+        });
+    }
+
+    /**
+     *
+     * 改成同步调用能够正常返回值.
+     * 但是应该是在成功的回调方法里面去调用另外的方法来处理这个东西.
+     * 下面文件里面的写法是不太合理的,应该是这个逻辑才对.
+     * @param id
+     * @param callback
+     * @returns {boolean}
+     */
+    function getSettingInfo(id,callback) {
+        if(id == 0 || id == undefined) {
+            return false
+        }
+        $.ajax({
+            type: "get",
+            url: "/admin/api/getsettinginfo?id="+id,
+            contentType: false,
+            success: function (res) {
+                if(res.errNo == 0) {
+                    callback(res.data)
+                }
+            },
+        });
+    }
     /**
      * file 为文件对象
      * @param file
@@ -641,6 +743,5 @@
             return false;
         })
     }();
-
     //文件结尾
 })();

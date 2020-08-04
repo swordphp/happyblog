@@ -10,12 +10,12 @@ import (
 )
 
 type Setting struct{
-    Id int `gorm:"primary_key" json:"id"`
-    BelongGroup string `gorm:"column:belongGroup;index:group_configKey" json:"group"`
-    ConfigName string `gorm:"column:configName;index:group_configKey" json:"configName"`
-    ConfigValue string `gorm:"column:configValue" json:"configValue"`
-    ConfigType string `gorm:"column:configType" json:"type"`
-    ConfigOrder int `gorm:"column:configOrder" json:"order"`
+    Id int `gorm:"primary_key" json:"id" form:"id"`
+    ConfigGroup string `gorm:"column:configGroup;index:group_configKey" json:"group" form:"ConfigGroup"`
+    ConfigName string `gorm:"column:configName;index:group_configKey" json:"configName" form:"ConfigName"`
+    ConfigValue string `gorm:"column:configValue" json:"configValue" form:"ConfigValue"`
+    ConfigType string `gorm:"column:configType" json:"type" form:"ConfigType"`
+    ConfigOrder int `gorm:"column:configOrder" json:"order" form:"ConfigOrder"`
 }
 
 
@@ -31,7 +31,7 @@ func (Setting) TableName() string {
  */
 func (Setting) GetConfigs() (groupRows map[string][]Setting,err error) {
     rows := new([]Setting)
-    err = ConnInstance.Where("belongGroup <> configName").Find(&rows).Error
+    err = ConnInstance.Where("configGroup <> configName").Find(&rows).Error
     if err != nil {
         Logf("get configs list err","","")
     }
@@ -39,7 +39,7 @@ func (Setting) GetConfigs() (groupRows map[string][]Setting,err error) {
     if rows != nil {
 
         for _,row := range *rows{
-            groupRows[row.BelongGroup] = append(groupRows[row.BelongGroup],row)
+            groupRows[row.ConfigGroup] = append(groupRows[row.ConfigGroup],row)
         }
     }
     return groupRows,err
@@ -52,7 +52,7 @@ func (Setting) GetConfigs() (groupRows map[string][]Setting,err error) {
  * return: error
  */
 func (model Setting) GetGroups()(groups []string,err error){
-    allRows,err := ConnInstance.Model(&model).Select("group").Group("belongGroup").Rows()
+    allRows,err := ConnInstance.Model(&model).Select("group").Group("configGroup").Rows()
     if allRows != nil {
         defer allRows.Close()
         for allRows.Next() {
@@ -62,6 +62,19 @@ func (model Setting) GetGroups()(groups []string,err error){
         }
     }
     return groups,err
+}
+
+/**
+ * 更新设置的方法
+ *
+ * param: Setting row
+ * return: int64
+ * return: error
+ */
+func (model Setting) UpdateConfigInfo(row Setting) (affectRows int64 ,err error){
+    err = ConnInstance.Model(&model).Save(row).Error
+    affectRows = ConnInstance.RowsAffected
+    return affectRows,err
 }
 
 /**
@@ -90,7 +103,7 @@ func (model Setting) GetConfigInfo(id int) (row Setting,err error) {
 func (model Setting) GetConfigsByGroup(group string) (rows []Setting,err error) {
     err = ConnInstance.
         Model(&model).
-        Where("belongGroup = ?",group).
+        Where("configGroup = ?",group).
         Order("configOrder ASC").
         Find(&rows).Error
     if err != nil {

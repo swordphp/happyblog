@@ -54,7 +54,15 @@ func (ctrl AdminApiController) SettingGroupAdd(c *gin.Context) {
  * param: *gin.Context c
  */
 func (ctrl AdminApiController) SettingAdd(c *gin.Context) {
-
+    setting := new(Setting)
+    c.ShouldBind(&setting)
+    rowId,err := setting.CreateConfig(*setting)
+    if err != nil {
+        c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":err,"data":""})
+    } else {
+        data := gin.H{"rowId":rowId}
+        c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","data":data})
+    }
 }
 
 /**
@@ -63,7 +71,14 @@ func (ctrl AdminApiController) SettingAdd(c *gin.Context) {
  * param: *gin.Context c
  */
 func (ctrl AdminApiController) SettingSave(c *gin.Context) {
-
+    setting := new(Setting)
+    c.ShouldBind(&setting)
+    _,err := setting.UpdateConfigInfo(*setting)
+    if err != nil {
+        c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":err,"data":""})
+    } else {
+        c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","data":""})
+    }
 }
 
 
