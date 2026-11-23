@@ -1,10 +1,14 @@
 package models
 
-import . "happyblog/library"
+import (
+    "errors"
+    . "happyblog/library"
+    "gorm.io/gorm"
+)
 
 //定义数据行
 type RelationArticleAlbums struct{
-    Id int `gorm:"column:id;primary_key"`
+    Id int `gorm:"column:id;primaryKey"`
     AlbumId int `gorm:"column:albumId;index:ablum_article"`
     ArticleId int `gorm:"column:articleId;index:ablum_article"`
 }
@@ -22,8 +26,8 @@ func (model RelationArticleAlbums) TableName() string {
  */
 func (model RelationArticleAlbums) GetBelongAlbumByArticleId (ArticleId int) (AlbumId int) {
     albumObj := new(RelationArticleAlbums)
-    err := ConnInstance.Model(&model).Where("articleId = ?", ArticleId).Find(&albumObj).Error
-    if ConnInstance.RecordNotFound() {
+    err := ConnInstance.Model(&model).Where("articleId = ?", ArticleId).First(&albumObj).Error
+    if errors.Is(err, gorm.ErrRecordNotFound) {
         return 0
     }
     if err != nil {
@@ -44,11 +48,11 @@ func (model RelationArticleAlbums) UpdateRowByArticleId (articleId int ,albumId 
         ArticleId:articleId,
         AlbumId:albumId,
     }
-    err := ConnInstance.Model(&model).Where("articleId = ?",articleId).Assign(&albumObj).FirstOrCreate(&albumObj).Error
-    if err != nil {
-        Logf("update relation error!","%v",err)
+    db := ConnInstance.Model(&model).Where("articleId = ?",articleId).Assign(&albumObj).FirstOrCreate(&albumObj)
+    if db.Error != nil {
+        Logf("update relation error!","%v",db.Error)
     }
-    return ConnInstance.RowsAffected
+    return db.RowsAffected
 }
 
 /**
@@ -58,11 +62,11 @@ func (model RelationArticleAlbums) UpdateRowByArticleId (articleId int ,albumId 
  * return: int
  */
 func (model RelationArticleAlbums) RemoveRowByArticleId (articleId int) (affectRows int64) {
-    err := ConnInstance.Delete(&model,"articleId = ?",articleId).Error
-    if err != nil {
-        Logf("remove relation err","%v",err)
+    db := ConnInstance.Delete(&model,"articleId = ?",articleId)
+    if db.Error != nil {
+        Logf("remove relation err","%v",db.Error)
     }
-    return ConnInstance.RowsAffected
+    return db.RowsAffected
 }
 
 /**
@@ -72,5 +76,45 @@ func (model RelationArticleAlbums) RemoveRowByArticleId (articleId int) (affectR
  * return: map[int]int64
  */
 func (model RelationArticleAlbums) GetQuoteTotalByAlbumIds(AlbumIds []int) (totalCounts map[int]int64){
+    totalCounts = make(map[int]int64)
+    if len(AlbumIds) == 0 {
+        return
+    }
+    type countRow struct{
+        AlbumId int
+        Total int64
+    }
+    var rows []countRow
+    err := ConnInstance.Model(&model).
+        Select("albumId, count(*) as total").
+        Where("albumId in (?)",AlbumIds).
+        Group("albumId").
+        Scan(&rows).Error
+    if err != nil {
+        Logf("get album quote total err","%v",err)
+        return
+    }
+    for _,r := range rows {
+        totalCounts[r.AlbumId] = r.Total
+    }
+    return
+}
+
+/**
+ * 获取某专辑下已发布文章的ID列表
+ *
+ * param: int albumId
+ * return: []int
+ */
+func (model RelationArticleAlbums) GetArticleIdsByAlbumId(albumId int) (articleIds []int) {
+    var relations []RelationArticleAlbums
+    err := ConnInstance.Model(&model).Where("albumId = ?",albumId).Find(&relations).Error
+    if err != nil {
+        Logf("get article ids by album err","%v",err)
+        return
+    }
+    for _,r := range relations {
+        articleIds = append(articleIds,r.ArticleId)
+    }
     return
 }

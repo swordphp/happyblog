@@ -17,10 +17,15 @@ func LoggerToFile() gin.HandlerFunc {
     tmpConf ,_ := library.ReadWebConfig()
     logConf := *tmpConf
     logFilePath := logConf["accesslog.logfile"]
+    if logFilePath == "" {
+        logFilePath = "./log"
+    }
     logFileName := logConf["accesslog.logname"]
+    if logFileName == "" {
+        logFileName = "access.log"
+    }
+    _ = os.MkdirAll(logFilePath, 0755)
 
-    fmt.Println(logFileName)
-    fmt.Println(logFilePath)
     // 日志文件
     fileName := path.Join(logFilePath, logFileName)
     // 写入文件

@@ -23,29 +23,6 @@ type QiNiuUpload struct{
 
 var QiNiuUploader = new(QiNiuUpload)
 
-func init(){
-	tmpConf ,_ := ReadWebConfig()
-	WebConf := *tmpConf
-	QiNiuUploader.ak = WebConf["qiniuoss.ak"]
-	QiNiuUploader.sk = WebConf["qiniuoss.sk"]
-	QiNiuUploader.bucket = WebConf["qiniuoss.bucket"]
-	zoneInfo,_ := getZone(WebConf["qiniuoss.zone"])
-	QiNiuUploader.zone = zoneInfo
-	if WebConf["qiniuoss.https"] == "1"{
-		QiNiuUploader.https = true
-	} else {
-		QiNiuUploader.https = false
-	}
-
-	if WebConf["qiniuoss.usecdndomain"] == "1" {
-		QiNiuUploader.useCdnDomain = true
-	} else {
-		QiNiuUploader.useCdnDomain = false
-	}
-	QiNiuUploader.pathTo = WebConf["qiniuoss.pathto"]
-}
-
-
 /**
  * 用户获取上传用的票据
  *

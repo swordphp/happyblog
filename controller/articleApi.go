@@ -1,7 +1,6 @@
 package controller
 
 import (
-    "fmt"
     "github.com/gin-gonic/gin"
     lib "happyblog/library"
     . "happyblog/models"
@@ -25,21 +24,22 @@ type ResArticle struct{
 func (api ArticleApi) ArticleInfo(c *gin.Context) {
 
     articleId,_ := strconv.Atoi(c.Param("id"))
+    render := new(lib.Render).Init()
     response := new(ResArticle)
     modelArticle := new(Article)
-    articleInfo,err := modelArticle.GetArticleInfo(articleId)
+    //公开接口只返回已发布文章,草稿/未发布内容不可见
+    articleInfo,err := modelArticle.GetPublishedArticleInfo(articleId)
+    if err != nil || articleInfo.Id == 0 {
+        render.SetErr(404,"article not found")
+        c.JSON(http.StatusOK,render)
+        return
+    }
     response.ArticleInfo = articleInfo
-
 
     ids := []int{articleId}
     response.Tags = api.getTagsByArticleId(ids)
-    response.Album,err = api.getAlbumInfoByArticleId(articleId)
-    render := new(lib.Render).Init()
-    if err == nil {
-        render.SetData(response)
-    } else {
-        render.SetErr(500,"get article info from db error  ")
-    }
+    response.Album,_ = api.getAlbumInfoByArticleId(articleId)
+    render.SetData(response)
     c.JSON(http.StatusOK,render)
 }
 
@@ -50,7 +50,11 @@ func (api ArticleApi) ArticleInfo(c *gin.Context) {
  * param: *gin.Context c
  */
 func (ArticleApi) ArticleList(c *gin.Context) {
-    page ,_ := strconv.Atoi(c.DefaultQuery("id","1"))
+    pageStr := c.Param("page")
+    page,_ := strconv.Atoi(pageStr)
+    if page < 1 {
+        page = 1
+    }
     modelArticle := new(Article)
     render := new(lib.Render).Init()
     articleList ,err := modelArticle.GetArticleListView(page)
@@ -69,7 +73,6 @@ func (ArticleApi) ArticleList(c *gin.Context) {
 func (ArticleApi) getTagsByArticleId(ids []int) (tags []Tags) {
     reTags := new(RelationArticleTags)
     articleTags := reTags.GetArticleTags(ids)
-    fmt.Println(articleTags)
     if articleTags != nil {
         ids := make([]int,len(articleTags))
         modelTags := new(Tags)

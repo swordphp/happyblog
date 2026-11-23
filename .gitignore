@@ -9,6 +9,13 @@ configs/webconfig.yaml
 gowatch
 happyblog
 log/*
+# SQLite 本地数据文件
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+# 本地上传的图片
+assets/uploads/
 # Test binary, built with `go test -c`
 *.test
 

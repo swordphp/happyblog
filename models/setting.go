@@ -10,7 +10,7 @@ import (
 )
 
 type Setting struct{
-    Id int `gorm:"primary_key" json:"id" form:"id"`
+    Id int `gorm:"primaryKey" json:"id" form:"id"`
     ConfigGroup string `gorm:"column:configGroup;index:group_configKey" json:"group" form:"ConfigGroup"`
     ConfigName string `gorm:"column:configName;index:group_configKey" json:"configName" form:"ConfigName"`
     ConfigValue string `gorm:"column:configValue" json:"configValue" form:"ConfigValue"`
@@ -52,12 +52,12 @@ func (Setting) GetConfigs() (groupRows map[string][]Setting,err error) {
  * return: error
  */
 func (model Setting) GetGroups()(groups []string,err error){
-    allRows,err := ConnInstance.Model(&model).Select("group").Group("configGroup").Rows()
+    allRows,err := ConnInstance.Model(&model).Select("configGroup").Group("configGroup").Rows()
     if allRows != nil {
         defer allRows.Close()
         for allRows.Next() {
             groupString := ""
-            _ = ConnInstance.ScanRows(allRows,groupString)
+            _ = allRows.Scan(&groupString)
             groups = append(groups,groupString)
         }
     }
@@ -72,9 +72,8 @@ func (model Setting) GetGroups()(groups []string,err error){
  * return: error
  */
 func (model Setting) UpdateConfigInfo(row Setting) (affectRows int64 ,err error){
-    err = ConnInstance.Model(&model).Save(row).Error
-    affectRows = ConnInstance.RowsAffected
-    return affectRows,err
+    db := ConnInstance.Model(&model).Save(row)
+    return db.RowsAffected,db.Error
 }
 
 /**
@@ -135,9 +134,9 @@ func (model Setting) CreateConfig (row Setting) (id int,err error) {
  * return: int64
  */
 func (model Setting) RemoveRow(id int)(affectRows int64) {
-    err := ConnInstance.Delete(Setting{},"id = ?",id).Error
-    if err != nil {
-        Logf("reomve row error","%v",err)
+    db := ConnInstance.Delete(Setting{},"id = ?",id)
+    if db.Error != nil {
+        Logf("reomve row error","%v",db.Error)
     }
-    return ConnInstance.RowsAffected
+    return db.RowsAffected
 }

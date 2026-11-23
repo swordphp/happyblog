@@ -1,122 +1,93 @@
 package controller
 
 import (
-	"crypto/md5"
-	"fmt"
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-gonic/gin"
-	lib "happyblog/library"
-	"happyblog/middleware"
-	. "happyblog/models"
-	"net/http"
-	"strconv"
+    "crypto/md5"
+    "fmt"
+    "net/http"
+    "strconv"
+
+    "github.com/gin-contrib/sessions"
+    "github.com/gin-gonic/gin"
+    "happyblog/middleware"
+    . "happyblog/models"
 )
-type controller struct{
-	webConf map[string]string
-	menu map[string]string
-	cacheUserInfo User
-}
+
+type controller struct{}
 
 type AdminController struct {
-	controller
+    controller
 }
 
 var CAdmin AdminController
 
-func init(){
-	webConf ,_ := lib.ReadWebConfig()
-	CAdmin.webConf = *webConf
-	menu,_ := lib.ReadLanguageConfig(CAdmin.webConf["language"])
-	CAdmin.menu = *menu
-}
-
-func (ctrl controller) GetCacheUinfo (c *gin.Context) (userInfo User) {
-	session := sessions.Default(c)
-	userInfo = User{}
-	if session.Get("UserId") != nil {
-		userId := session.Get("UserId").(int)
-		tmpInfo,_ := middleware.UserInfoCache.Get("userInfo" + strconv.Itoa(userId))
-		userInfo = tmpInfo.(User)
-	}
-	return
+// GetCacheUinfo 从会话+缓存中取出当前登录用户信息
+func (ctrl controller) GetCacheUinfo(c *gin.Context) (userInfo User) {
+    userInfo = User{}
+    session := sessions.Default(c)
+    if session.Get("UserId") != nil && middleware.UserInfoCache != nil {
+        userId := session.Get("UserId").(int)
+        if tmpInfo, found := middleware.UserInfoCache.Get("userInfo" + strconv.Itoa(userId)); found {
+            userInfo = tmpInfo.(User)
+        }
+    }
+    return
 }
 
 /**
- * 管理系统的欢迎界面
+ * Login 处理管理员登录,密码为 md5(明文 + salt).
+ * 成功后写入会话并返回用户信息 JSON.
  *
  * param: *gin.Context c
  */
-func (ctrl AdminController) Welcome(c *gin.Context){
-	ctrl.cacheUserInfo = ctrl.GetCacheUinfo(c)
-	c.HTML(http.StatusOK, "index", gin.H{
-		"title": ctrl.webConf["sitename"],
-		"userInfo": ctrl.cacheUserInfo,
-		"menu":ctrl.menu,
-		"welcome":1,
-	})
+func (ctrl AdminController) Login(c *gin.Context) {
+    var form struct {
+        Email    string `json:"email" form:"email"`
+        Password string `json:"password" form:"password"`
+    }
+    _ = c.ShouldBind(&form)
+
+    saltPassword := fmt.Sprintf("%x", md5.Sum([]byte(form.Password+webConf["salt"])))
+    ModelUser := new(User)
+    userInfo, err := ModelUser.GetUserInfo(form.Email)
+    if userInfo.Id == 0 || userInfo.AccountPassword != saltPassword || err != nil {
+        c.JSON(http.StatusOK, gin.H{"errNo": 10, "errMsg": "邮箱或密码错误"})
+        return
+    }
+
+    session := sessions.Default(c)
+    session.Set("UserId", userInfo.Id)
+    session.Save()
+    middleware.UserInfoCache.Set("userInfo"+strconv.Itoa(userInfo.Id), userInfo, 0)
+    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": userInfo})
 }
 
 /**
- * 显示管理系统的登录界面
+ * LogOut 清理会话与缓存.
  *
  * param: *gin.Context c
  */
-func (ctrl AdminController) LoginDisplay(c *gin.Context){
-
-	c.HTML(http.StatusOK, "login", gin.H{
-		"title": ctrl.webConf["sitename"],
-		"menu":ctrl.menu,
-	})
+func (ctrl AdminController) LogOut(c *gin.Context) {
+    session := sessions.Default(c)
+    if session.Get("UserId") != nil {
+        userId := session.Get("UserId").(int)
+        if middleware.UserInfoCache != nil {
+            middleware.UserInfoCache.Delete("userInfo" + strconv.Itoa(userId))
+        }
+        session.Delete("UserId")
+        session.Save()
+    }
+    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success"})
 }
 
 /**
- * 处理用户的登出
+ * Me 返回当前登录用户信息,供 SPA 判断登录态.
  *
  * param: *gin.Context c
  */
-func (ctrl AdminController) LogOut (c *gin.Context) {
-	session := sessions.Default(c)
-	if session.Get("UserId") != nil {
-		userId := session.Get("UserId").(int)
-		cacheKey := "userInfo" + strconv.Itoa(userId)
-		middleware.UserInfoCache.Delete(cacheKey)
-		session.Delete("UserId")
-		session.Save()
-	}
-	c.Redirect(http.StatusFound,"/admin/login")
+func (ctrl AdminController) Me(c *gin.Context) {
+    userInfo := ctrl.GetCacheUinfo(c)
+    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": gin.H{
+        "user":     userInfo,
+        "sitename": webConf["sitename"],
+    }})
 }
-
-
-/**
- * 处理用户的登录
- * 用户登录的密码使用  md5(password+salt)
- * param: *gin.Context c
- */
-func (ctrl AdminController) Login(c *gin.Context){
-	session := sessions.Default(c)
-	loginUser := c.PostForm("userEmail")
-	passWord  := c.PostForm("password")
-	saltPassword := fmt.Sprintf("%x", md5.Sum([]byte(passWord + ctrl.webConf["salt"])))
-	//fmt.Println(saltPassword)
-	ModelUser := new(User)
-	userInfo,err := ModelUser.GetUserInfo(loginUser)
-	if userInfo.Id == 0 || userInfo.AccountPassword != saltPassword || err != nil {
-		//用户不存在,或者密码错误,或者发生了数据库错误.
-
-		errMsg := ctrl.menu["passwderr"]
-		c.HTML(http.StatusOK, "login", gin.H{
-			"title": ctrl.webConf["sitename"],
-			"menu":ctrl.menu,
-			"errmsg":errMsg,
-			"inputUsername": c.PostForm("userEmail"),
-			"moreinfo":fmt.Sprintf("%v",err),
-		})
-	} else {
-		session.Set("UserId",userInfo.Id)
-		session.Save()
-		cacheKey := "userInfo" + strconv.Itoa(userInfo.Id)
-		middleware.UserInfoCache.Set(cacheKey,userInfo,0)
-		c.Redirect(http.StatusFound,"/admin/")
-	}
-}
-

@@ -20,13 +20,6 @@ type AdminApiController struct{
 
 var CAdminApi AdminApiController
 
-func init(){
-    webConf ,_ := lib.ReadWebConfig()
-    CAdminApi.webConf = *webConf
-    menu,_ := lib.ReadLanguageConfig(CAdminApi.webConf["language"])
-    CAdminApi.menu = *menu
-}
-
 
 /**
  * 获取指定的配置项信息
@@ -88,7 +81,11 @@ func (ctrl AdminApiController) SettingSave(c *gin.Context) {
  * param: *gin.Context c
  */
 func (ctrl AdminApiController) Upload(c *gin.Context){
-    uploadFile, _ := c.FormFile("file")
+    uploadFile, err := c.FormFile("file")
+    if err != nil {
+        c.JSON(http.StatusOK,gin.H{"errNo":10,"errMsg":"no file uploaded","viewUrl":""})
+        return
+    }
     fileHandel ,_:= uploadFile.Open()
     defer fileHandel.Close()
     filename ,_:= c.GetPostForm("filename")
@@ -98,15 +95,31 @@ func (ctrl AdminApiController) Upload(c *gin.Context){
     filename = filename + "." + ext
     buf := bytes.NewBuffer(nil)
     io.Copy(buf, fileHandel)
-    upName,err := lib.QiNiuUploader.UpLoadFile(filename,buf.Bytes(),uploadFile.Size)
-    if err != nil {
-        log.Println(err)
-        c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":err,"viewUrl":""})
 
+    //按配置选择存储后端,默认本地磁盘;qiniu 走七牛云
+    driver := strings.ToLower(strings.TrimSpace(webConf["storage.driver"]))
+    var viewUrl string
+    var upErr error
+    if driver == "qiniu" {
+        var upName string
+        upName, upErr = lib.QiNiuUploader.UpLoadFile(filename,buf.Bytes(),uploadFile.Size)
+        if upErr == nil {
+            viewUrl = webConf["fileviewurlpre"] + upName
+        }
     } else {
-        viewUrl := ctrl.webConf["fileviewurlpre"] + upName
-        c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"","viewUrl":viewUrl})
+        var upName string
+        upName, upErr = lib.LocalUploader.UpLoadFile(filename,buf.Bytes())
+        if upErr == nil {
+            viewUrl = lib.LocalUploader.ViewUrl(upName)
+        }
     }
+
+    if upErr != nil {
+        log.Println(upErr)
+        c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":fmt.Sprintf("%v",upErr),"viewUrl":""})
+        return
+    }
+    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"","viewUrl":viewUrl})
 }
 
 /**
@@ -115,7 +128,7 @@ func (ctrl AdminApiController) Upload(c *gin.Context){
  * param: *gin.Context c
  */
 func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
-    articleId ,_ := strconv.Atoi(c.DefaultQuery("id","0"))
+    articleId ,_ := strconv.Atoi(c.DefaultPostForm("id","0"))
     articleModel := new(Article)
     rowAffect := articleModel.RemoveRow(articleId)
 
@@ -138,7 +151,7 @@ func (ctrl AdminApiController) ArticleRemove(c *gin.Context) {
  * param: *gin.Context c
  */
 func (ctrl AdminApiController) SettingRemove(c *gin.Context) {
-    settingId ,_ := strconv.Atoi(c.DefaultQuery("id","0"))
+    settingId ,_ := strconv.Atoi(c.DefaultPostForm("id","0"))
     settingModel := new(Setting)
     rowAffect := settingModel.RemoveRow(settingId)
     c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","affectRows":rowAffect})
@@ -151,16 +164,52 @@ func (ctrl AdminApiController) SettingRemove(c *gin.Context) {
  */
 func (ctrl AdminApiController) TagAdd(c *gin.Context) {
     tagName,_ :=c.GetPostForm("tagName")
+    if strings.TrimSpace(tagName) == "" {
+        c.JSON(http.StatusOK,gin.H{"errNo":10,"errMsg":"tagName is empty","data":""})
+        return
+    }
     modelTags := new(Tags)
     tagId ,err := modelTags.AddTag(tagName)
     if err != nil {
         errInfo := fmt.Sprintf("%v",err)
         c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":errInfo,"data":""})
+        return
     }
     resInfo := make(map[string]string)
     resInfo["tagName"] = tagName
     resInfo["tagId"] = strconv.Itoa(tagId)
     c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","data":resInfo})
+}
+
+/**
+ * 获取全部标签列表
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) TagList(c *gin.Context) {
+    modelTags := new(Tags)
+    tags,err := modelTags.GetAllTags()
+    if err != nil {
+        c.JSON(http.StatusOK,gin.H{"errNo":500,"errMsg":fmt.Sprintf("%v",err),"data":nil})
+        return
+    }
+    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","data":tags})
+}
+
+/**
+ * 通过标签ID删除标签(同时清理文章关联)
+ *
+ * param: *gin.Context c
+ */
+func (ctrl AdminApiController) TagRemove(c *gin.Context) {
+    tagId ,_ := strconv.Atoi(c.DefaultPostForm("id","0"))
+    if tagId == 0 {
+        c.JSON(http.StatusOK,gin.H{"errNo":10,"errMsg":"id is required","affectRows":0})
+        return
+    }
+    modelTags := new(Tags)
+    affect := modelTags.RemoveTagById(tagId)
+    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success","affectRows":affect})
 }
 
 /**
@@ -180,8 +229,8 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
     articleModel.Keywords = c.DefaultPostForm("keywords","")
     articleModel.Brief = c.DefaultPostForm("describe","")
     if articleModel.Brief == "" {
-        //如果简介信息为空,将内容前200字截取为简介
-        articleModel.Brief = articleModel.Content[0:200]
+        //如果简介信息为空,将内容前200字(按字符)截取为简介
+        articleModel.Brief = lib.MakeBrief(articleModel.Content,200)
     }
     articleModel.Headimage = c.DefaultPostForm("headimage","")
     articleModel.Uri = c.DefaultPostForm("uri","")
@@ -202,11 +251,19 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
         articleModel.UpdateArticleRow(*articleModel)
         if albumId != -1 {
             _ = relationArticleAlbumsModel.UpdateRowByArticleId(articleId,albumId)
-        }
-        if albumId != originAlbumId {
-            //专辑属性发生变化
-            albumModel.UpdateAlbumArticleTotal(originAlbumId,-1)
-            albumModel.UpdateAlbumArticleTotal(albumId,1)
+            if albumId != originAlbumId {
+                //专辑发生变化:原专辑计数-1(原来有专辑时),新专辑计数+1
+                if originAlbumId != 0 {
+                    albumModel.UpdateAlbumArticleTotal(originAlbumId,-1)
+                }
+                albumModel.UpdateAlbumArticleTotal(albumId,1)
+            }
+        } else {
+            //albumId == -1 表示移除专辑归属
+            if originAlbumId != 0 {
+                relationArticleAlbumsModel.RemoveRowByArticleId(articleId)
+                albumModel.UpdateAlbumArticleTotal(originAlbumId,-1)
+            }
         }
 
     } else {
@@ -215,9 +272,8 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
         articleModel.AuthorId = cUserInfo.Id
         insertId  := articleModel.CreateArticleRow(*articleModel)
         if albumId != -1 {
+            //建立专辑关联,并增加该专辑的文章计数
             _ = relationArticleAlbumsModel.UpdateRowByArticleId(insertId,albumId)
-        } else {
-            //增加专辑引用数量
             albumModel.UpdateAlbumArticleTotal(albumId,1)
         }
         articleId = insertId

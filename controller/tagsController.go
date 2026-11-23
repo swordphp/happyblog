@@ -1,15 +1,11 @@
 package controller
 
 import (
-    "github.com/gin-contrib/sessions"
-    "github.com/gin-gonic/gin"
-    lib "happyblog/library"
-    "happyblog/middleware"
-    . "happyblog/models"
     "net/http"
-    "strconv"
-)
 
+    "github.com/gin-gonic/gin"
+    . "happyblog/models"
+)
 
 type TagsController struct {
     controller
@@ -17,29 +13,17 @@ type TagsController struct {
 
 var CTags TagsController
 
-func init(){
-    webConf ,_ := lib.ReadWebConfig()
-    CTags.webConf = *webConf
-    menu,_ := lib.ReadLanguageConfig(CTags.webConf["language"])
-    CTags.menu = *menu
-}
 /**
- * 文章列表页面
+ * Tags 返回全部标签(JSON).后台标签管理页使用.
  *
  * param: *gin.Context c
  */
-func (ctrl TagsController) Tags(c *gin.Context){
-    session := sessions.Default(c)
-    cacheUserInfo := User{}
-    if session.Get("UserId") != nil {
-        userId := session.Get("UserId").(int)
-        tmpInfo,_ := middleware.UserInfoCache.Get("userInfo" + strconv.Itoa(userId))
-        cacheUserInfo = tmpInfo.(User)
+func (ctrl TagsController) Tags(c *gin.Context) {
+    modelTags := new(Tags)
+    tags, err := modelTags.GetAllTags()
+    if err != nil {
+        c.JSON(http.StatusOK, gin.H{"errNo": 500, "errMsg": err.Error(), "data": nil})
+        return
     }
-    c.HTML(http.StatusOK, "index", gin.H{
-        "title": ctrl.webConf["sitename"],
-        "userInfo": cacheUserInfo,
-        "menu":ctrl.menu,
-        "tags":1,
-    })
+    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": tags})
 }

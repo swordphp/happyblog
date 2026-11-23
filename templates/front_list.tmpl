@@ -1,0 +1,17 @@
+{{define "front_list"}}
+{{template "front_layout_head" .}}
+    <a href="/" class="text-decoration-none text-muted">&laquo; 返回首页</a>
+    <h2 class="my-3">{{.listTitle}}</h2>
+    {{range $a := .articles}}
+    <article class="post-card">
+        <h2><a href="/article/{{$a.Id}}">{{$a.Title}}</a></h2>
+        <div class="post-meta">
+            {{$a.AuthorInfo.NickName}} · {{$a.UpdateTime.Format "2006-01-02"}}
+        </div>
+        <div class="post-brief">{{$a.Brief}}</div>
+    </article>
+    {{else}}
+    <p class="text-muted">这里还没有文章。</p>
+    {{end}}
+{{template "front_layout_foot" .}}
+{{end}}

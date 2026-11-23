@@ -1,12 +1,12 @@
 package controller
 
 import (
-    "github.com/gin-gonic/gin"
-    lib "happyblog/library"
-    . "happyblog/models"
     "net/http"
     "strconv"
     "time"
+
+    "github.com/gin-gonic/gin"
+    . "happyblog/models"
 )
 
 type AlbumsController struct {
@@ -15,46 +15,39 @@ type AlbumsController struct {
 
 var CAlbums AlbumsController
 
-type AlbumsJsonRes struct{
-    Data Album `json:"data"`
-    ErrNo int `json:"errNo"`
+type AlbumsJsonRes struct {
+    Data   Album  `json:"data"`
+    ErrNo  int    `json:"errNo"`
     ErrMsg string `json:"errMsg"`
 }
 
-func init(){
-    webConf ,_ := lib.ReadWebConfig()
-    CAlbums.webConf = *webConf
-    menu,_ := lib.ReadLanguageConfig(CAlbums.webConf["language"])
-    CAlbums.menu = *menu
-}
 /**
- * 专辑列表
+ * Albums 返回专辑列表(JSON).
  *
  * param: *gin.Context c
  */
-func (ctrl AlbumsController) Albums(c *gin.Context){
+func (ctrl AlbumsController) Albums(c *gin.Context) {
     ModelAlbums := new(Album)
-    albumsRows,_ := ModelAlbums.GetAlbumList(1)
-    c.HTML(http.StatusOK, "index", gin.H{
-        "title": ctrl.webConf["sitename"],
-        "userInfo": ctrl.GetCacheUinfo(c),
-        "menu":ctrl.menu,
-        "AlbumsList":albumsRows,
-        "albums":1,
-    })
+    albumsRows, _ := ModelAlbums.GetAlbumList(1)
+    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": albumsRows})
 }
 
+/**
+ * AlbumsSaveInfo 新建或更新专辑.
+ *
+ * param: *gin.Context c
+ */
 func (ctrl AlbumsController) AlbumsSaveInfo(c *gin.Context) {
     cacheUserInfo := ctrl.GetCacheUinfo(c)
     createUserId := cacheUserInfo.Id
     albumName := c.PostForm("albumName")
     if albumName == "" {
-        c.JSON(http.StatusOK,gin.H{"errNo":10,"errMsg":"params error"})
+        c.JSON(http.StatusOK, gin.H{"errNo": 10, "errMsg": "params error"})
         return
     }
-    publicNum,_ := strconv.ParseInt(c.PostForm("isPublic"),10,8)
+    publicNum, _ := strconv.ParseInt(c.PostForm("isPublic"), 10, 8)
     isPublic := int8(publicNum)
-    id ,_:= strconv.Atoi(c.PostForm("id"))
+    id, _ := strconv.Atoi(c.PostForm("id"))
     Albums := Album{
         Id:           id,
         AlbumName:    albumName,
@@ -69,28 +62,22 @@ func (ctrl AlbumsController) AlbumsSaveInfo(c *gin.Context) {
     } else {
         Albums.UpdateAlbum(Albums)
     }
-    c.JSON(http.StatusOK,gin.H{"errNo":0,"errMsg":"success"})
+    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success"})
 }
 
 /**
- * 返回json格式的专辑信息
+ * AlbumsGetInfo 返回单个专辑信息(JSON).
  *
  * param: *gin.Context c
  */
 func (ctrl AlbumsController) AlbumsGetInfo(c *gin.Context) {
     ModelAlbums := new(Album)
-    id ,_:= strconv.Atoi(c.Param("id"))
-    albumInfo,err := ModelAlbums.GetAlbumInfo(id)
-    res := AlbumsJsonRes{
-        Data: albumInfo,
-        ErrNo:      0,
-        ErrMsg:     "success",
-    }
+    id, _ := strconv.Atoi(c.Param("id"))
+    albumInfo, err := ModelAlbums.GetAlbumInfo(id)
+    res := AlbumsJsonRes{Data: albumInfo, ErrNo: 0, ErrMsg: "success"}
     if err != nil {
         res.ErrNo = 500
         res.ErrMsg = err.Error()
-        c.JSON(http.StatusOK,res)
-    } else {
-        c.JSON(http.StatusOK,res)
     }
+    c.JSON(http.StatusOK, res)
 }

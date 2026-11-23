@@ -4,7 +4,7 @@ import "time"
 import . "happyblog/library"
 
 type Tags struct{
-    Id int `gorm:"primary_key" json:"id"`
+    Id int `gorm:"primaryKey" json:"id"`
     TagName string `gorm:"column:tagName;unique" json:"tagName"`
     CreateTime time.Time `gorm:"column:createTime" json:"-"`
 }
@@ -55,13 +55,41 @@ func (model Tags) GetTagInfoByName(tagName string) (res Tags,err error){
     return res,err
 }
 
-func (model Tags) GetTagsInfo(tagsName []string)(res []Tags) {
+/**
+ * 通过标签名称批量获取标签信息
+ *
+ * param: []string tagsName
+ * return: []Tags
+ * return: error
+ */
+func (model Tags) GetTagsInfo(tagsName []string)(res []Tags,err error) {
+    if len(tagsName) == 0 {
+        return
+    }
+    err = ConnInstance.Model(&model).Where("tagName in (?)",tagsName).Find(&res).Error
+    if err != nil {
+        Logf("get tags info err","%v",err)
+    }
     return
 }
 
 
-func (model Tags) RemoveTagByName(tagName string) (affectRows int) {
-    return
+/**
+ * 通过标签ID删除标签,同时清理文章-标签关联
+ *
+ * param: int id
+ * return: int64
+ */
+func (model Tags) RemoveTagById(id int) (affectRows int64) {
+    db := ConnInstance.Delete(Tags{},"id = ?",id)
+    if db.Error != nil {
+        Logf("remove tag err","%v",db.Error)
+        return 0
+    }
+    // 清理该标签在文章关联表里的记录
+    reModel := new(RelationArticleTags)
+    _ = ConnInstance.Delete(reModel,"tagId = ?",id).Error
+    return db.RowsAffected
 }
 
 /**
@@ -73,6 +101,7 @@ func (model Tags) RemoveTagByName(tagName string) (affectRows int) {
 func (model Tags) AddTag(tagName string) (id int,err error) {
     tags := new(Tags)
     tags.TagName = tagName
+    tags.CreateTime = time.Now()
     err = ConnInstance.Model(&model).Create(&tags).Error
     if err != nil {
         Logf("create tag error ","%v",err)

@@ -6,13 +6,13 @@ import (
 )
 
 type Article struct{
-    Id int `gorm:"primary_key" json:"id"`
+    Id int `gorm:"primaryKey" json:"id"`
     Title string `gorm:"column:title" json:"title"`
     Content string `gorm:"column:content" json:"content,omitempty"`
     PubStatus int8 `gorm:"column:pubStatus" json:"pubStatus,omitempty"`
     CreateTime time.Time `gorm:"column:createTime"   json:"createTime"`
     UpdateTime time.Time `gorm:"column:updateTime"  json:"updateTime"`
-    AuthorInfo User `gorm:"foreignkey:authorId" json:"authorInfo"`
+    AuthorInfo User `gorm:"foreignKey:AuthorId;references:Id" json:"authorInfo"`
     AuthorId int `gorm:"column:authorId" json:"-"`
     IndependPage int8 `gorm:"column:independPage" json:"independPage"`
     Brief string `gorm:"column:brief" json:"brief"`
@@ -34,7 +34,22 @@ func (Article) TableName () string{
  * return: error
  */
 func (Article) GetArticleInfo(id int) (row Article,err error) {
-    ConnInstance.Preload("AuthorInfo").First(&row,id)
+    err = ConnInstance.Preload("AuthorInfo").First(&row,id).Error
+    return
+}
+
+/**
+ * 通过文章ID 获取已发布文章的内容(供公开API/读者端使用)
+ * 仅返回 pubStatus=1 的文章,草稿与未发布内容不可见
+ *
+ * param: int id
+ * return: Article
+ * return: error
+ */
+func (Article) GetPublishedArticleInfo(id int) (row Article,err error) {
+    err = ConnInstance.Preload("AuthorInfo").
+        Where("id = ? and pubStatus = ?",id,1).
+        First(&row).Error
     return
 }
 
@@ -45,7 +60,24 @@ func (Article) GetArticleInfo(id int) (row Article,err error) {
  * return: error
  */
 func (model Article) GetArticlesTotal() (total int,err error) {
-    ConnInstance.Model(&model).Count(&total)
+    var cnt int64
+    err = ConnInstance.Model(&model).Count(&cnt).Error
+    total = int(cnt)
+    return
+}
+
+/**
+ * 返回已发布(非独立页)文章的总数,供读者端分页使用
+ *
+ * return: int
+ * return: error
+ */
+func (model Article) GetPublishedTotal() (total int,err error) {
+    var cnt int64
+    err = ConnInstance.Model(&model).
+        Where("pubStatus = ? and independPage <> ?",1,1).
+        Count(&cnt).Error
+    total = int(cnt)
     return
 }
 
@@ -64,7 +96,7 @@ func (Article) GetArticleListView(page int) (rows []Article,err error) {
     } else {
         limitStart = (page-1) *perPage
     }
-    err = ConnInstance.Select("title,createTime,updateTime,authorId,brief,keywords,headimage").
+    err = ConnInstance.Select("id,title,createTime,updateTime,authorId,brief,keywords,headimage,uri").
         Preload("AuthorInfo").
         Where("pubStatus = ? and independPage <> ?",1,1).
         Order("updateTime DESC").
@@ -76,10 +108,27 @@ func (Article) GetArticleListView(page int) (rows []Article,err error) {
     return rows,err
 }
 
-
-
-
-
+/**
+ * 通过一组文章ID获取已发布文章(供标签页/专辑页使用),按更新时间倒序
+ *
+ * param: []int ids
+ * return: []Article
+ * return: error
+ */
+func (Article) GetPublishedArticlesByIds(ids []int) (rows []Article,err error) {
+    if len(ids) == 0 {
+        return
+    }
+    err = ConnInstance.Select("id,title,createTime,updateTime,authorId,brief,keywords,headimage,uri").
+        Preload("AuthorInfo").
+        Where("id in (?) and pubStatus = ?",ids,1).
+        Order("updateTime DESC").
+        Find(&rows).Error
+    if err != nil {
+        Logf("get published articles by ids err","%v",err)
+    }
+    return
+}
 /**
  * 通过排序字段获取
  *
@@ -137,12 +186,12 @@ func (model Article) CreateArticleRow(row Article) (insertId int) {
  */
 func (model Article) UpdateArticleRow(row Article) (affectRows int64) {
     row.UpdateTime = time.Now()
-    err := ConnInstance.Model(&model).Updates(row).Error
-    if err != nil {
+    db := ConnInstance.Model(&model).Updates(row)
+    if db.Error != nil {
         Logf("update article err","%v",row)
         return 0
     }
-    return ConnInstance.RowsAffected
+    return db.RowsAffected
 }
 
 /**
@@ -152,9 +201,9 @@ func (model Article) UpdateArticleRow(row Article) (affectRows int64) {
  * return: int64
  */
 func (model Article) RemoveRow(id int)(affectRows int64) {
-    err := ConnInstance.Delete(Article{},"id = ?",id).Error
-    if err != nil {
-        Logf("reomve row error","%v",err)
+    db := ConnInstance.Delete(Article{},"id = ?",id)
+    if db.Error != nil {
+        Logf("reomve row error","%v",db.Error)
     }
-    return ConnInstance.RowsAffected
+    return db.RowsAffected
 }

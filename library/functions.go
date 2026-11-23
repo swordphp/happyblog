@@ -1,53 +1,88 @@
 package library
 
 import (
+    "os"
+    "path/filepath"
+    "sync"
+
     viper "github.com/spf13/viper"
 )
 
-var config = viper.New()
+const configDir = "./configs"
 
+var (
+    confMu     sync.RWMutex
+    cachedConf map[string]string
+)
 
-/**
- * 获取配置中的网站整体配置
- *
- * return: map[string]string 配置信息
- * return: error
- */
-func ReadWebConfig()  (conf *map[string]string, err error){
-    tmpConf := make(map[string]string)
+// ConfigFilePath 返回主配置文件的磁盘路径
+func ConfigFilePath() string {
+    return filepath.Join(configDir, "webconfig.yaml")
+}
 
-    config.AddConfigPath("./configs")     //设置读取的文件路径
-    config.SetConfigName("webconfig") //设置读取的文件名
-    config.SetConfigType("yaml")
-    if err := config.ReadInConfig(); err != nil {
-        panic(err)
-    }
-    for _,key  := range config.AllKeys() {
-        tmpConf[key] = config.GetString(key)
-    }
-    return &tmpConf,err
+// IsInstalled 判断站点是否已完成安装(主配置文件是否存在)
+func IsInstalled() bool {
+    _, err := os.Stat(ConfigFilePath())
+    return err == nil
 }
 
 /**
- * 获取配置信息中的语言
- *
- * param: string language
- * return: map[string]string 对应的key->v 翻译信息
- * return: error
+ * LoadConfig 从磁盘(重新)读取 webconfig.yaml 并刷新缓存.
+ * 安装完成后需要调用它让新写入的配置生效.
+ * 读取失败时返回空 map(非 nil),保证调用方的 *map 解引用安全.
  */
-func ReadLanguageConfig(language string) (conf *map[string]string,err error) {
+func LoadConfig() (map[string]string, error) {
+    v := viper.New()
+    v.AddConfigPath(configDir)
+    v.AddConfigPath("../configs") // 兼容在子包目录下运行(如 go test)
+    v.SetConfigName("webconfig")
+    v.SetConfigType("yaml")
+
+    conf := make(map[string]string)
+    err := v.ReadInConfig()
+    if err == nil {
+        for _, key := range v.AllKeys() {
+            conf[key] = v.GetString(key)
+        }
+    }
+
+    confMu.Lock()
+    cachedConf = conf
+    confMu.Unlock()
+    return conf, err
+}
+
+/**
+ * ReadWebConfig 返回缓存的网站配置,首次调用时按需加载.
+ * 永不 panic,返回的 map 始终非 nil(未安装时为空 map).
+ */
+func ReadWebConfig() (conf *map[string]string, err error) {
+    confMu.RLock()
+    c := cachedConf
+    confMu.RUnlock()
+    if c != nil {
+        return &c, nil
+    }
+    loaded, err := LoadConfig()
+    return &loaded, err
+}
+
+/**
+ * ReadLanguageConfig 读取语言文件中的菜单翻译信息.
+ * 读取失败时返回空 map(非 nil),永不 panic.
+ */
+func ReadLanguageConfig(language string) (conf *map[string]string, err error) {
     tmpConf := make(map[string]string)
     if language == "" {
         language = "cn"
     }
-    config.AddConfigPath("./configs/language")
-    config.SetConfigName(language)
-    config.SetConfigType("yaml")
-    if err := config.ReadInConfig(); err != nil {
-        panic(err)
+    v := viper.New()
+    v.AddConfigPath(filepath.Join(configDir, "language"))
+    v.AddConfigPath(filepath.Join("../configs", "language"))
+    v.SetConfigName(language)
+    v.SetConfigType("yaml")
+    if err = v.ReadInConfig(); err == nil {
+        tmpConf = v.GetStringMapString("menu")
     }
-    tmpConf = config.GetStringMapString("menu")
-    return &tmpConf,err
+    return &tmpConf, err
 }
-
-

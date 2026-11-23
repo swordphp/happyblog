@@ -1,17 +1,35 @@
 sitename: "HappyBlog"
+# 站点对外地址,用于生成 RSS 链接等,例如 https://blog.example.com
+siteurl: "http://localhost:8888"
+# 站点描述,用于 RSS 与读者端页面
+sitedesc: "一个用 Go 写的开源博客"
 language: "cn"
-salt: "happyBlog"
+# 密码加盐用的 salt,请修改为随机字符串
+salt: "change-me-salt"
+# 会话 cookie 的签名密钥,请修改为随机字符串(留空则回退使用 salt)
+sessionsecret: "change-me-session-secret"
 sessionalive: "7200"
-# 登录状态的有效期
+# 登录状态的有效期(秒)
 database:
-  driver: "mysql"
+  # 数据库类型: sqlite(默认,本地单文件,免安装) 或 mysql(含 MariaDB)
+  driver: "sqlite"
+  # sqlite 数据文件路径(driver=sqlite 时生效)
+  sqlitepath: "./happyblog.db"
+  # 以下在 driver=mysql 时生效
   port: "3306"
   hostname: "127.0.0.1"
+  dbname: "happyblog"
   username: "your mysql db username"
   password: "your mysql db password"
   maxidel: 10
   maxopen: 20
-# 好像暴露了我密码的嗜好 ..
+
+# 首次启动且用户表为空时,自动创建的默认管理员(留空则不创建)
+# 密码会以 md5(password + salt) 存储,登录时用此处的明文
+admin:
+  email: "admin@happyblog.local"
+  password: "admin123"
+  nickname: "admin"
 
 timezone: "Asia/Shanghai"
 
@@ -24,12 +42,22 @@ serviceLog:
   logname: "service.log"
 
 
+# ===== 图片/文件存储 =====
+storage:
+  # 存储后端: local(默认,存服务器本地磁盘,免外部依赖) 或 qiniu(七牛云)
+  driver: "local"
+  # driver=local 时: 文件保存目录 与 对外访问 URL 前缀
+  localpath: "./assets/uploads"
+  localurlpre: "/assets/uploads/"
+
+# 图片访问 URL 前缀(driver=qiniu 时生效,填七牛空间绑定的域名),例如 https://img.example.com/
 fileviewurlpre: ""
 
+# driver=qiniu 时生效
 qiniuOSS:
   bucket: "happyblog"
   ak: ""
-  sk: "--"
+  sk: ""
   https: "1"
   zone: "ZoneHuanan"
   usecdndomain : "0"

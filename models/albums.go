@@ -6,19 +6,19 @@ package models
  */
 
 import (
-    "github.com/jinzhu/gorm"
+    "gorm.io/gorm"
     . "happyblog/library"
     "time"
 )
 
 type Album struct{
-    Id int `gorm:"primary_key" json:"id"`
+    Id int `gorm:"primaryKey" json:"id"`
     AlbumName string `gorm:"column:albumName" json:"albumName"`
     IsPublic int8 `gorm:"column:isPublic" json:"isPublic"`
     AuthorId int `gorm:"column:authorId" json:"-"`
     CreateTime time.Time `gorm:"column:createTime" json:"createTime"`
     ArticleTotal int `gorm:"column:articleTotal" json:"articleTotal"`
-    AuthorInfo *User `gorm:"foreignkey:authorId" json:"authorInfo,omitempty"`
+    AuthorInfo *User `gorm:"foreignKey:AuthorId;references:Id" json:"authorInfo,omitempty"`
 }
 
 
@@ -35,15 +35,17 @@ func (Album) TableName() string {
  * return: error
  */
 func (Album) GetAlbumList(page int) (rows []Album,err error) {
-    limitStart , limitEnd  := 0,0
-    if page<= 1 {
-        limitStart = 0
-        limitEnd = 10
-    } else {
-        limitStart = (page-1) *10
-        limitEnd = page*10
+    query := ConnInstance.Preload("AuthorInfo")
+    if page >= 0 {
+        // page<0 表示取全部(供文章编辑页的专辑下拉使用)
+        perPage := 10
+        limitStart := 0
+        if page > 1 {
+            limitStart = (page-1) *perPage
+        }
+        query = query.Offset(limitStart).Limit(perPage)
     }
-    err = ConnInstance.Preload("AuthorInfo").Offset(limitStart).Limit(limitEnd).Find(&rows).Error
+    err = query.Find(&rows).Error
     if err != nil {
         Logf("get album list err","%v",page)
     }
@@ -56,11 +58,35 @@ func (Album) GetAlbumList(page int) (rows []Album,err error) {
  */
 
 func (model Album) GetAlbumInfo(id int) (row Album,err error) {
-    err = ConnInstance.Debug().Model(&model).Preload("AuthorInfo").Find(&row,id).Error
+    err = ConnInstance.Model(&model).Preload("AuthorInfo").Find(&row,id).Error
     if err != nil {
         Logf("get album info error","%v",nil)
     }
     return row,err
+}
+
+/**
+ * 获取公开专辑列表(供读者端/公开API使用)
+ *
+ * param: int page
+ * return: []Album
+ * return: error
+ */
+func (model Album) GetPublicAlbumList(page int) (rows []Album,err error) {
+    perPage := 10
+    limitStart := 0
+    if page > 1 {
+        limitStart = (page-1) *perPage
+    }
+    err = ConnInstance.Model(&model).Preload("AuthorInfo").
+        Where("isPublic = ?",1).
+        Order("createTime DESC").
+        Offset(limitStart).Limit(perPage).
+        Find(&rows).Error
+    if err != nil {
+        Logf("get public album list err","%v",page)
+    }
+    return
 }
 
 /**
@@ -103,14 +129,16 @@ func (model Album) CreateAlbum (album Album) (id int,err error) {
  * return: bool
  */
 func (model Album) UpdateAlbum (album Album) (res bool) {
-    err := ConnInstance.Model(&model).Updates(album).Error
-    if err != nil {
+    // 用 map 显式更新,避免 isPublic=0(私有)被 GORM 当作零值跳过
+    db := ConnInstance.Model(&model).Where("id = ?",album.Id).Updates(map[string]interface{}{
+        "albumName": album.AlbumName,
+        "isPublic":  album.IsPublic,
+    })
+    if db.Error != nil {
         Logf("update album info error","%v",album)
+        return false
     }
-    if ConnInstance.RowsAffected > 0 {
-        return true
-    }
-    return false
+    return db.RowsAffected > 0
 }
 
 /**

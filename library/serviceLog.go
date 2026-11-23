@@ -25,7 +25,14 @@ func  logInfo(msg string,format string,args interface{},logtype string) {
 	tmpConf ,_ := ReadWebConfig()
 	logConf := *tmpConf
 	logFilePath := logConf["servicelog.logfile"]
+	if logFilePath == "" {
+		logFilePath = "./log"
+	}
 	logFileName := logConf["servicelog.logname"]
+	if logFileName == "" {
+		logFileName = "service.log"
+	}
+	_ = os.MkdirAll(logFilePath, 0755)
 	// 日志文件
 	fileName := path.Join(logFilePath, logFileName)
 	// 写入文件
