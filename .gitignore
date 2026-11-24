@@ -16,6 +16,9 @@ log/*
 *.db-shm
 # 本地上传的图片
 assets/uploads/
+# 本地备份文件(安装数据等临时备份)
+*.bak
+*.bak.*
 # Test binary, built with `go test -c`
 *.test
 

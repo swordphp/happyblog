@@ -3,7 +3,6 @@ package controller
 import (
     "crypto/md5"
     "fmt"
-    "net/http"
     "strconv"
 
     "github.com/gin-contrib/sessions"
@@ -20,7 +19,7 @@ type AdminController struct {
 
 var CAdmin AdminController
 
-// GetCacheUinfo 从会话+缓存中取出当前登录用户信息
+// GetCacheUinfo 从会话 + 缓存中取出当前登录用户信息
 func (ctrl controller) GetCacheUinfo(c *gin.Context) (userInfo User) {
     userInfo = User{}
     session := sessions.Default(c)
@@ -34,10 +33,8 @@ func (ctrl controller) GetCacheUinfo(c *gin.Context) (userInfo User) {
 }
 
 /**
- * Login 处理管理员登录,密码为 md5(明文 + salt).
- * 成功后写入会话并返回用户信息 JSON.
- *
- * param: *gin.Context c
+ * Login 处理管理员登录,密码为 md5(明文 + salt)。
+ * 成功后写入会话并返回用户信息。
  */
 func (ctrl AdminController) Login(c *gin.Context) {
     var form struct {
@@ -47,24 +44,21 @@ func (ctrl AdminController) Login(c *gin.Context) {
     _ = c.ShouldBind(&form)
 
     saltPassword := fmt.Sprintf("%x", md5.Sum([]byte(form.Password+webConf["salt"])))
-    ModelUser := new(User)
-    userInfo, err := ModelUser.GetUserInfo(form.Email)
-    if userInfo.Id == 0 || userInfo.AccountPassword != saltPassword || err != nil {
-        c.JSON(http.StatusOK, gin.H{"errNo": 10, "errMsg": "邮箱或密码错误"})
+    userInfo, err := new(User).GetUserInfo(form.Email)
+    if err != nil || userInfo.Id == 0 || userInfo.AccountPassword != saltPassword {
+        respFail(c, errCodeParam, "邮箱或密码错误")
         return
     }
 
     session := sessions.Default(c)
     session.Set("UserId", userInfo.Id)
-    session.Save()
+    _ = session.Save()
     middleware.UserInfoCache.Set("userInfo"+strconv.Itoa(userInfo.Id), userInfo, 0)
-    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": userInfo})
+    respOK(c, userInfo)
 }
 
 /**
- * LogOut 清理会话与缓存.
- *
- * param: *gin.Context c
+ * LogOut 清理会话与缓存。
  */
 func (ctrl AdminController) LogOut(c *gin.Context) {
     session := sessions.Default(c)
@@ -74,20 +68,17 @@ func (ctrl AdminController) LogOut(c *gin.Context) {
             middleware.UserInfoCache.Delete("userInfo" + strconv.Itoa(userId))
         }
         session.Delete("UserId")
-        session.Save()
+        _ = session.Save()
     }
-    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success"})
+    respOK(c, nil)
 }
 
 /**
- * Me 返回当前登录用户信息,供 SPA 判断登录态.
- *
- * param: *gin.Context c
+ * Me 返回当前登录用户信息,供 SPA 判断登录态。
  */
 func (ctrl AdminController) Me(c *gin.Context) {
-    userInfo := ctrl.GetCacheUinfo(c)
-    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": gin.H{
-        "user":     userInfo,
+    respOK(c, gin.H{
+        "user":     ctrl.GetCacheUinfo(c),
         "sitename": webConf["sitename"],
-    }})
+    })
 }

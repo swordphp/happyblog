@@ -1,11 +1,6 @@
 package router
 
 import (
-    "embed"
-    "io/fs"
-    "net/http"
-    "strings"
-
     "github.com/gin-contrib/sessions"
     "github.com/gin-contrib/sessions/cookie"
     "github.com/gin-gonic/gin"
@@ -15,29 +10,11 @@ import (
 )
 
 /**
- * AdminRouter 注册后台路由:
- *   - 后台 SPA(Vite+Vue 构建产物,内嵌于二进制)挂在 /admin 下
- *   - 后台 JSON 接口挂在 /admin/api 下,登录接口公开,其余需要会话鉴权
- *   - SPA 的前端路由通过 NoRoute 兜底返回 index.html
+ * AdminRouter 注册后台 JSON 接口(挂在 /admin/api 下):
+ *   - 登录接口公开(仅需已安装),其余接口需要会话鉴权
+ *   - 页面由前端 SPA 负责(见 SpaRouter)
  */
-func AdminRouter(router *gin.Engine, distFS embed.FS) {
-    dist, _ := fs.Sub(distFS, "web/dist")
-
-    // Vite 构建后的静态资源位于 web/dist/assets
-    if assetsSub, err := fs.Sub(dist, "assets"); err == nil {
-        router.StaticFS("/admin/assets", http.FS(assetsSub))
-    }
-
-    serveIndex := func(c *gin.Context) {
-        data, err := fs.ReadFile(dist, "index.html")
-        if err != nil {
-            c.String(http.StatusInternalServerError, "admin UI 未构建,请先执行 `make build-web` 或 `npm run build`")
-            return
-        }
-        c.Data(http.StatusOK, "text/html; charset=utf-8", data)
-    }
-    router.GET("/admin", serveIndex)
-
+func AdminRouter(router *gin.Engine) {
     // 会话存储密钥:优先取配置,未安装时用随机临时密钥
     secret := lib.SessionSecret()
     store := cookie.NewStore([]byte(secret))
@@ -85,18 +62,4 @@ func AdminRouter(router *gin.Engine, distFS embed.FS) {
         //上传
         api.POST("/upload", CAdminApi.Upload)
     }
-
-    // SPA 前端路由兜底
-    router.NoRoute(func(c *gin.Context) {
-        p := c.Request.URL.Path
-        if strings.HasPrefix(p, "/admin/api") {
-            c.JSON(http.StatusNotFound, gin.H{"errNo": 404, "errMsg": "not found"})
-            return
-        }
-        if strings.HasPrefix(p, "/admin") {
-            serveIndex(c)
-            return
-        }
-        c.String(http.StatusNotFound, "404 not found")
-    })
 }

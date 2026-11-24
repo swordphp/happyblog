@@ -24,6 +24,7 @@ func ApiRouter(router *gin.Engine) {
         }
 
         publicApi := new(controller.PublicApi)
+        apiGroup.GET("/siteinfo", publicApi.SiteInfo)
         apiGroup.GET("/tags", publicApi.Tags)
         apiGroup.GET("/tag/:id/articles", publicApi.TagArticles)
         apiGroup.GET("/albums/:page", publicApi.Albums)

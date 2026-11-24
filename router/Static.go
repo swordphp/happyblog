@@ -2,21 +2,10 @@ package router
 
 import (
     "github.com/gin-gonic/gin"
-    "happyblog/middleware"
-    . "happyblog/controller"
 )
 
-// StaticRouter 注册读者端静态资源(本地磁盘),上传文件也落在 ./assets/uploads 下
+// StaticRouter 注册读者上传的文件(本地磁盘),上传文件落在 ./assets/uploads 下。
+// 前端 SPA 自身的静态资源由 SpaRouter 挂在 /spa 下,两者路径不冲突。
 func StaticRouter(router *gin.Engine) {
     router.Static("/assets", "./assets/")
-    router.StaticFile("/favicon.ico", "./assets/favicon.ico")
-}
-
-// FrontRouter 注册面向读者的服务端渲染页面路由(未安装时跳转到安装向导)
-func FrontRouter(router *gin.Engine) {
-    g := router.Group("/", middleware.PageInstalledGuard())
-    g.GET("/", CFront.Index)
-    g.GET("/article/:id", CFront.Article)
-    g.GET("/tag/:id", CFront.Tag)
-    g.GET("/album/:id", CFront.Album)
 }

@@ -1,8 +1,6 @@
 package controller
 
 import (
-    "net/http"
-
     "github.com/gin-gonic/gin"
     . "happyblog/models"
 )
@@ -14,12 +12,9 @@ type SettingController struct {
 var CSetting SettingController
 
 /**
- * Settings 返回按分组组织的配置项(JSON).
- *
- * param: *gin.Context c
+ * Settings 返回按分组组织的配置项。
  */
 func (ctrl SettingController) Settings(c *gin.Context) {
-    ModelSetting := new(Setting)
-    configs, _ := ModelSetting.GetConfigs()
-    c.JSON(http.StatusOK, gin.H{"errNo": 0, "errMsg": "success", "data": configs})
+    configs, _ := new(Setting).GetConfigs()
+    respOK(c, configs)
 }

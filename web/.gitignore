@@ -1,0 +1,7 @@
+node_modules
+*.local
+.DS_Store
+npm-debug.log*
+
+# 注意: web/dist 是 Go 二进制要内嵌的前端产物,需要提交到仓库
+# (保证 `go build` 在没有 node 的环境也能编译)。不要忽略它。
