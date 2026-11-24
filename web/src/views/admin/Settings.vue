@@ -1,20 +1,48 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import api from '@/api'
 
-const groups = ref({})   // { groupName: [setting, ...] }
+const { t } = useI18n()
+const groups = ref({})
 const loading = ref(false)
 const dialog = ref(false)
 const saving = ref(false)
 const form = reactive({ id: 0, ConfigGroup: '', ConfigName: '', ConfigValue: '', ConfigType: 'text', ConfigOrder: 0 })
+
+// 网站基础信息(存在配置文件里,独立于下方的配置项表)
+const siteForm = reactive({ sitename: '', sitedesc: '', siteurl: '' })
+const siteSaving = ref(false)
+
+async function loadSite() {
+  try {
+    const d = await api.adminSiteConfig()
+    siteForm.sitename = d.sitename || ''
+    siteForm.sitedesc = d.sitedesc || ''
+    siteForm.siteurl = d.siteurl || ''
+  } catch (e) { /* 忽略 */ }
+}
+
+async function saveSite() {
+  if (!siteForm.sitename.trim()) { ElMessage.warning(t('setting.needSiteName')); return }
+  siteSaving.value = true
+  try {
+    await api.adminSiteConfigSave({ ...siteForm })
+    ElMessage.success(t('common.saved'))
+  } catch (e) {
+    ElMessage.error(e.message || t('common.saveFailed'))
+  } finally {
+    siteSaving.value = false
+  }
+}
 
 async function load() {
   loading.value = true
   try {
     groups.value = (await api.adminSettings()) || {}
   } catch (e) {
-    ElMessage.error(e.message || '加载失败')
+    ElMessage.error(e.message || t('common.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -30,22 +58,22 @@ async function saveRow(row) {
       ConfigType: row.type,
       ConfigOrder: row.order,
     })
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
   } catch (e) {
-    ElMessage.error(e.message || '保存失败')
+    ElMessage.error(e.message || t('common.saveFailed'))
   }
 }
 
 async function removeRow(row) {
   try {
-    await ElMessageBox.confirm(`删除配置「${row.configName}」?`, '提示', { type: 'warning' })
+    await ElMessageBox.confirm(t('setting.confirmDel', { name: row.configName }), t('common.confirmTitle'), { type: 'warning' })
   } catch (e) { return }
   try {
     await api.adminSettingRemove(row.id)
-    ElMessage.success('已删除')
+    ElMessage.success(t('common.deleted'))
     load()
   } catch (e) {
-    ElMessage.error(e.message || '删除失败')
+    ElMessage.error(e.message || t('common.delFailed'))
   }
 }
 
@@ -56,54 +84,72 @@ function openAdd() {
 
 async function submitAdd() {
   if (!form.ConfigGroup.trim() || !form.ConfigName.trim()) {
-    ElMessage.warning('分组和名称不能为空'); return
+    ElMessage.warning(t('setting.needGroupName')); return
   }
   saving.value = true
   try {
     await api.adminSettingAdd({ ...form })
-    ElMessage.success('已添加')
+    ElMessage.success(t('common.saved'))
     dialog.value = false
     load()
   } catch (e) {
-    ElMessage.error(e.message || '添加失败')
+    ElMessage.error(e.message || t('common.saveFailed'))
   } finally {
     saving.value = false
   }
 }
 
-onMounted(load)
+onMounted(() => { loadSite(); load() })
 </script>
 <template>
   <div class="bar">
-    <h2 class="page-title">设置</h2>
-    <el-button type="primary" @click="openAdd">新增配置项</el-button>
+    <h2 class="page-title">{{ $t('setting.title') }}</h2>
+    <el-button type="primary" @click="openAdd">{{ $t('setting.addItem') }}</el-button>
   </div>
+
+  <el-card class="group-card" shadow="never">
+    <template #header><b>{{ $t('setting.siteSection') }}</b></template>
+    <el-form label-width="90px" style="max-width:620px">
+      <el-form-item :label="$t('setting.siteName')">
+        <el-input v-model="siteForm.sitename" :placeholder="$t('setting.siteNamePh')" />
+      </el-form-item>
+      <el-form-item :label="$t('setting.siteDesc')">
+        <el-input v-model="siteForm.sitedesc" type="textarea" :rows="2" :placeholder="$t('setting.siteDescPh')" />
+      </el-form-item>
+      <el-form-item :label="$t('setting.siteUrl')">
+        <el-input v-model="siteForm.siteurl" :placeholder="$t('setting.siteUrlPh')" />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" :loading="siteSaving" @click="saveSite">{{ $t('common.save') }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-card>
 
   <div v-loading="loading">
     <el-card v-for="(items, groupName) in groups" :key="groupName" class="group-card" shadow="never">
-      <template #header><b>{{ groupName || '未分组' }}</b></template>
+      <template #header><b>{{ groupName || $t('setting.noGroup') }}</b></template>
       <div v-for="row in items" :key="row.id" class="setting-row">
         <span class="name">{{ row.configName }}</span>
         <el-input v-model="row.configValue" class="val" />
-        <el-button type="primary" @click="saveRow(row)">保存</el-button>
-        <el-button type="danger" plain @click="removeRow(row)">删除</el-button>
+        <el-button type="primary" @click="saveRow(row)">{{ $t('common.save') }}</el-button>
+        <el-button type="danger" plain @click="removeRow(row)">{{ $t('common.del') }}</el-button>
       </div>
-      <p v-if="!items.length" class="muted">该分组暂无配置项。</p>
+      <p v-if="!items.length" class="muted">{{ $t('setting.emptyGroup') }}</p>
     </el-card>
-    <p v-if="!Object.keys(groups).length" class="muted">还没有任何配置项。</p>
+    <p v-if="!Object.keys(groups).length" class="muted">{{ $t('setting.empty') }}</p>
   </div>
 
-  <el-dialog v-model="dialog" title="新增配置项" width="460px">
+  <el-dialog v-model="dialog" :title="$t('setting.addItem')" width="460px">
     <el-form label-width="70px">
-      <el-form-item label="分组"><el-input v-model="form.ConfigGroup" /></el-form-item>
-      <el-form-item label="名称"><el-input v-model="form.ConfigName" /></el-form-item>
-      <el-form-item label="值"><el-input v-model="form.ConfigValue" /></el-form-item>
-      <el-form-item label="类型"><el-input v-model="form.ConfigType" placeholder="text" /></el-form-item>
-      <el-form-item label="排序"><el-input v-model.number="form.ConfigOrder" type="number" /></el-form-item>
+      <el-form-item :label="$t('setting.group')"><el-input v-model="form.ConfigGroup" /></el-form-item>
+      <el-form-item :label="$t('setting.cfgName')"><el-input v-model="form.ConfigName" /></el-form-item>
+      <el-form-item :label="$t('setting.cfgValue')"><el-input v-model="form.ConfigValue" /></el-form-item>
+      <el-form-item :label="$t('setting.cfgType')"><el-input v-model="form.ConfigType" placeholder="text" /></el-form-item>
+      <el-form-item :label="$t('setting.cfgOrder')"><el-input v-model.number="form.ConfigOrder" type="number" /></el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="dialog = false">取消</el-button>
-      <el-button type="primary" :loading="saving" @click="submitAdd">添加</el-button>
+      <el-button @click="dialog = false">{{ $t('common.cancel') }}</el-button>
+      <el-button type="primary" :loading="saving" @click="submitAdd">{{ $t('common.add') }}</el-button>
     </template>
   </el-dialog>
 </template>
@@ -117,4 +163,3 @@ onMounted(load)
 .setting-row .val { flex: 1; }
 .muted { color: #999; font-size: 13px; }
 </style>
-

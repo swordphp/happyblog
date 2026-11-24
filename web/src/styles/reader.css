@@ -21,7 +21,16 @@ body {
 a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-.container { max-width: 820px; margin: 0 auto; padding: 0 20px; }
+/* 内容容器:常规/小屏保持原有 820px 上限;大屏下随视口变宽(最高 1280px)。 */
+.container { width: 100%; max-width: 820px; margin: 0 auto; padding: 0 24px; }
+@media (min-width: 1024px) {
+  .container { max-width: clamp(820px, 80vw, 1280px); }
+}
+
+/* 粘性页脚:内容不足一屏时页脚仍贴在底部,内容超出时自然下沉。 */
+.reader-layout { display: flex; flex-direction: column; min-height: 100vh; }
+.reader-layout .main { flex: 1 0 auto; }
+.reader-layout .site-footer { flex-shrink: 0; }
 
 .site-header { background: var(--card); border-bottom: 1px solid var(--border); padding: 22px 0; }
 .site-header .title { font-size: 24px; font-weight: 700; color: var(--fg); }

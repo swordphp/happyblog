@@ -1,12 +1,14 @@
 <script setup>
 import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 
 const props = defineProps({ id: { type: [String, Number], default: 0 } })
 const router = useRouter()
+const { t } = useI18n()
 
 const isEdit = computed(() => Number(props.id) > 0)
 const loading = ref(false)
@@ -22,10 +24,10 @@ const f = reactive({
   describe: '',
   keywords: '',
   headimage: '',
-  tagIds: [],      // 标签ID数组
-  albumId: -1,     // -1 表示无专辑
-  pubStatus: 1,    // 1 发布 / 0 草稿
-  independPage: 0, // 1 独立页面
+  tagIds: [],
+  albumId: -1,
+  pubStatus: 1,
+  independPage: 0,
 })
 
 const preview = computed(() => marked.parse(f.content || ''))
@@ -56,14 +58,14 @@ async function load() {
       albumsList.value = albums || []
     }
   } catch (e) {
-    ElMessage.error(e.message || '加载失败')
+    ElMessage.error(e.message || t('common.loadFailed'))
   } finally {
     loading.value = false
   }
 }
 
 async function save(pubStatus) {
-  if (!f.title.trim()) { ElMessage.warning('请填写标题'); return }
+  if (!f.title.trim()) { ElMessage.warning(t('article.needTitle')); return }
   saving.value = true
   try {
     await api.adminArticleSave({
@@ -79,10 +81,10 @@ async function save(pubStatus) {
       pubStatus: pubStatus != null ? pubStatus : f.pubStatus,
       independPage: f.independPage,
     })
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     router.push({ name: 'admin-articles' })
   } catch (e) {
-    ElMessage.error(e.message || '保存失败')
+    ElMessage.error(e.message || t('common.saveFailed'))
   } finally {
     saving.value = false
   }
@@ -94,9 +96,9 @@ async function onUpload(ev) {
   try {
     const url = await api.upload(file, file.name)
     f.content += `\n![${file.name}](${url})\n`
-    ElMessage.success('图片已插入')
+    ElMessage.success(t('article.imageInserted'))
   } catch (e) {
-    ElMessage.error(e.message || '上传失败')
+    ElMessage.error(e.message || t('article.uploadFailed'))
   } finally {
     ev.target.value = ''
   }
@@ -106,59 +108,59 @@ onMounted(load)
 </script>
 <template>
   <div class="bar">
-    <h2 class="page-title">{{ isEdit ? '编辑文章' : '写文章' }}</h2>
+    <h2 class="page-title">{{ isEdit ? $t('article.editTitle') : $t('article.write') }}</h2>
     <div>
-      <el-button @click="router.push({ name: 'admin-articles' })">返回</el-button>
-      <el-button :loading="saving" @click="save(0)">存为草稿</el-button>
-      <el-button type="primary" :loading="saving" @click="save(1)">发布</el-button>
+      <el-button @click="router.push({ name: 'admin-articles' })">{{ $t('common.back') }}</el-button>
+      <el-button :loading="saving" @click="save(0)">{{ $t('article.saveDraft') }}</el-button>
+      <el-button type="primary" :loading="saving" @click="save(1)">{{ $t('article.publish') }}</el-button>
     </div>
   </div>
 
   <el-form v-loading="loading" label-width="80px" class="editor">
-    <el-form-item label="标题">
-      <el-input v-model="f.title" placeholder="文章标题" />
+    <el-form-item :label="$t('article.title')">
+      <el-input v-model="f.title" :placeholder="$t('article.titlePh')" />
     </el-form-item>
-    <el-form-item label="别名">
-      <el-input v-model="f.uri" placeholder="可选,用于 URL" />
+    <el-form-item :label="$t('article.slug')">
+      <el-input v-model="f.uri" :placeholder="$t('article.slugPh')" />
     </el-form-item>
 
-    <el-form-item label="正文">
+    <el-form-item :label="$t('article.body')">
       <div class="md-toolbar">
         <label class="upload-btn">
-          插入图片
+          {{ $t('article.insertImage') }}
           <input type="file" accept="image/*" hidden @change="onUpload" />
         </label>
-        <span class="muted">支持 Markdown</span>
+        <span class="muted">{{ $t('article.mdHint') }}</span>
       </div>
       <div class="md-split">
-        <el-input v-model="f.content" type="textarea" :rows="18" resize="none" placeholder="在此输入 Markdown…" />
+        <el-input v-model="f.content" type="textarea" :rows="18" resize="none" :placeholder="$t('article.mdPh')" />
         <div class="md-preview article-content" v-html="preview"></div>
       </div>
     </el-form-item>
 
-    <el-form-item label="简介">
-      <el-input v-model="f.describe" type="textarea" :rows="2" placeholder="留空则自动截取正文前 200 字" />
+    <el-form-item :label="$t('article.brief')">
+      <el-input v-model="f.describe" type="textarea" :rows="2" :placeholder="$t('article.briefPh')" />
     </el-form-item>
-    <el-form-item label="标签">
-      <el-select v-model="f.tagIds" multiple filterable placeholder="选择标签" style="width:100%">
-        <el-option v-for="t in tagsList" :key="t.id" :label="t.tagName" :value="t.id" />
+    <el-form-item :label="$t('article.tags')">
+      <el-select v-model="f.tagIds" multiple filterable :placeholder="$t('article.tagsPh')" style="width:100%">
+        <el-option v-for="tag in tagsList" :key="tag.id" :label="tag.tagName" :value="tag.id" />
       </el-select>
     </el-form-item>
-    <el-form-item label="专辑">
+    <el-form-item :label="$t('article.album')">
       <el-select v-model="f.albumId" style="width:100%">
-        <el-option label="无专辑" :value="-1" />
+        <el-option :label="$t('article.noAlbum')" :value="-1" />
         <el-option v-for="a in albumsList" :key="a.id" :label="a.albumName" :value="a.id" />
       </el-select>
     </el-form-item>
-    <el-form-item label="关键词">
-      <el-input v-model="f.keywords" placeholder="可选,逗号分隔,用于 SEO" />
+    <el-form-item :label="$t('article.keywords')">
+      <el-input v-model="f.keywords" :placeholder="$t('article.keywordsPh')" />
     </el-form-item>
-    <el-form-item label="头图">
-      <el-input v-model="f.headimage" placeholder="可选,图片 URL" />
+    <el-form-item :label="$t('article.headimage')">
+      <el-input v-model="f.headimage" :placeholder="$t('article.headimagePh')" />
     </el-form-item>
-    <el-form-item label="独立页面">
+    <el-form-item :label="$t('article.independPage')">
       <el-switch v-model="f.independPage" :active-value="1" :inactive-value="0" />
-      <span class="muted" style="margin-left:10px">独立页面不出现在首页列表</span>
+      <span class="muted" style="margin-left:10px">{{ $t('article.independHint') }}</span>
     </el-form-item>
   </el-form>
 </template>
@@ -174,4 +176,3 @@ onMounted(load)
 .md-preview { border: 1px solid #e4e7ed; border-radius: 4px; padding: 10px 14px; overflow: auto; max-height: 420px; background: #fafafa; }
 .muted { color: #999; font-size: 13px; }
 </style>
-

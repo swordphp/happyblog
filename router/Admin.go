@@ -54,6 +54,8 @@ func AdminRouter(router *gin.Engine) {
 
         //设置
         api.GET("/settings", CSetting.Settings)
+        api.GET("/siteconfig", CSetting.SiteConfigGet)
+        api.POST("/siteconfig", CSetting.SiteConfigSave)
         api.GET("/setting", CAdminApi.GetSettingInfo)
         api.POST("/setting/add", CAdminApi.SettingAdd)
         api.POST("/setting/save", CAdminApi.SettingSave)

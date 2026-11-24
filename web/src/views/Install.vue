@@ -1,9 +1,12 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import api from '@/api'
+import LangSwitch from '@/components/LangSwitch.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 const submitting = ref(false)
 const error = ref('')
 const done = ref(false)
@@ -25,10 +28,10 @@ const f = reactive({
 })
 
 function validate() {
-  if (!f.sitename.trim()) return '请填写站点名称'
-  if (!f.adminEmail.trim() || !f.adminPassword.trim()) return '请填写管理员邮箱与密码'
+  if (!f.sitename.trim()) return t('install.errSiteName')
+  if (!f.adminEmail.trim() || !f.adminPassword.trim()) return t('install.errAdmin')
   if ((f.dbDriver === 'mysql' || f.dbDriver === 'mariadb') && (!f.dbHost || !f.dbName || !f.dbUser)) {
-    return 'MySQL 连接信息不完整(主机/库名/用户)'
+    return t('install.errMysql')
   }
   return ''
 }
@@ -43,53 +46,53 @@ async function submit() {
     done.value = true
     setTimeout(() => router.push({ name: 'admin-login' }), 1200)
   } catch (e) {
-    error.value = e.message || '安装失败'
+    error.value = e.message || t('install.failed')
   } finally {
     submitting.value = false
   }
 }
 </script>
-
 <template>
   <div class="install-wrap">
     <div class="install-card">
-      <h1>HappyBlog 安装向导</h1>
-      <p class="muted">填写以下信息完成初始化,无需重启即可使用。</p>
+      <div class="install-top"><LangSwitch /></div>
+      <h1>{{ $t('install.title') }}</h1>
+      <p class="muted">{{ $t('install.intro') }}</p>
 
-      <div v-if="done" class="ok">安装成功,正在跳转到登录页…</div>
+      <div v-if="done" class="ok">{{ $t('install.done') }}</div>
 
       <template v-else>
-        <h3>站点信息</h3>
-        <label>站点名称 *<input v-model="f.sitename" placeholder="我的博客" /></label>
-        <label>站点地址<input v-model="f.siteurl" placeholder="https://example.com" /></label>
-        <label>站点描述<input v-model="f.sitedesc" placeholder="一句话介绍" /></label>
+        <h3>{{ $t('install.siteSection') }}</h3>
+        <label>{{ $t('install.siteName') }} *<input v-model="f.sitename" :placeholder="$t('install.siteNamePh')" /></label>
+        <label>{{ $t('install.siteUrl') }}<input v-model="f.siteurl" placeholder="https://example.com" /></label>
+        <label>{{ $t('install.siteDesc') }}<input v-model="f.sitedesc" :placeholder="$t('install.siteDescPh')" /></label>
 
-        <h3>数据库</h3>
-        <label>类型
+        <h3>{{ $t('install.dbSection') }}</h3>
+        <label>{{ $t('install.dbType') }}
           <select v-model="f.dbDriver">
-            <option value="sqlite">SQLite(推荐,免外置数据库)</option>
-            <option value="mysql">MySQL / MariaDB</option>
+            <option value="sqlite">{{ $t('install.dbSqlite') }}</option>
+            <option value="mysql">{{ $t('install.dbMysql') }}</option>
           </select>
         </label>
         <template v-if="f.dbDriver === 'sqlite'">
-          <label>数据文件路径<input v-model="f.sqlitePath" /></label>
+          <label>{{ $t('install.sqlitePath') }}<input v-model="f.sqlitePath" /></label>
         </template>
         <template v-else>
-          <label>主机<input v-model="f.dbHost" /></label>
-          <label>端口<input v-model="f.dbPort" /></label>
-          <label>数据库名<input v-model="f.dbName" /></label>
-          <label>用户名<input v-model="f.dbUser" /></label>
-          <label>密码<input v-model="f.dbPassword" type="password" /></label>
+          <label>{{ $t('install.dbHost') }}<input v-model="f.dbHost" /></label>
+          <label>{{ $t('install.dbPort') }}<input v-model="f.dbPort" /></label>
+          <label>{{ $t('install.dbName') }}<input v-model="f.dbName" /></label>
+          <label>{{ $t('install.dbUser') }}<input v-model="f.dbUser" /></label>
+          <label>{{ $t('install.dbPassword') }}<input v-model="f.dbPassword" type="password" /></label>
         </template>
 
-        <h3>管理员账号</h3>
-        <label>邮箱 *<input v-model="f.adminEmail" type="email" placeholder="admin@example.com" /></label>
-        <label>密码 *<input v-model="f.adminPassword" type="password" /></label>
-        <label>昵称<input v-model="f.adminNickname" /></label>
+        <h3>{{ $t('install.adminSection') }}</h3>
+        <label>{{ $t('install.email') }} *<input v-model="f.adminEmail" type="email" placeholder="admin@example.com" /></label>
+        <label>{{ $t('install.password') }} *<input v-model="f.adminPassword" type="password" /></label>
+        <label>{{ $t('install.nickname') }}<input v-model="f.adminNickname" /></label>
 
         <p v-if="error" class="err">{{ error }}</p>
         <button class="btn primary" :disabled="submitting" @click="submit">
-          {{ submitting ? '安装中…' : '开始安装' }}
+          {{ submitting ? $t('install.submitting') : $t('install.submit') }}
         </button>
       </template>
     </div>
@@ -99,7 +102,8 @@ async function submit() {
 <style scoped>
 .install-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 40px 16px; }
 .install-card { width: 100%; max-width: 480px; background: #fff; border: 1px solid #ececec; border-radius: 12px; padding: 32px 36px; box-shadow: 0 6px 30px rgba(0,0,0,.05); }
-.install-card h1 { font-size: 22px; margin: 0 0 6px; }
+.install-top { display: flex; justify-content: flex-end; }
+.install-card h1 { font-size: 22px; margin: 6px 0 6px; }
 .install-card h3 { margin: 22px 0 8px; font-size: 15px; color: #333; border-bottom: 1px solid #f0f0f0; padding-bottom: 6px; }
 label { display: block; font-size: 13px; color: #555; margin-bottom: 12px; }
 input, select { display: block; width: 100%; margin-top: 4px; padding: 9px 11px; border: 1px solid #d9d9d9; border-radius: 6px; font-size: 14px; }

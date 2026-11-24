@@ -65,6 +65,8 @@ export const api = {
 
   // ---- 管理端:用户 / 设置 ----
   adminUsers: () => call(http.get('/admin/api/users')),
+  adminSiteConfig: () => call(http.get('/admin/api/siteconfig')),
+  adminSiteConfigSave: (data) => call(http.post('/admin/api/siteconfig', form(data))),
   adminSettings: () => call(http.get('/admin/api/settings')),
   adminSetting: (id) => call(http.get('/admin/api/setting', { params: { id } })),
   adminSettingAdd: (data) => call(http.post('/admin/api/setting/add', form(data))),

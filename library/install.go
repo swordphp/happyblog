@@ -159,6 +159,29 @@ func WriteWebConfig(f InstallForm) error {
 }
 
 /**
+ * UpdateSiteConfig 仅更新站点基础信息(名称/地址/简介),保留配置其余部分
+ * (salt、sessionsecret、数据库、管理员等均不动)。供后台「设置」实时修改。
+ */
+func UpdateSiteConfig(sitename, siteurl, sitedesc string) error {
+    data, err := os.ReadFile(ConfigFilePath())
+    if err != nil {
+        return err
+    }
+    cfg := map[string]interface{}{}
+    if err := yaml.Unmarshal(data, &cfg); err != nil {
+        return err
+    }
+    cfg["sitename"] = sitename
+    cfg["siteurl"] = siteurl
+    cfg["sitedesc"] = sitedesc
+    out, err := yaml.Marshal(cfg)
+    if err != nil {
+        return err
+    }
+    return os.WriteFile(ConfigFilePath(), out, 0644)
+}
+
+/**
  * ConfigureStorage 用配置初始化本地与七牛云上传器.
  * 在配置加载或安装完成后调用.
  */

@@ -1,8 +1,10 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 
+const { t } = useI18n()
 const albums = ref([])
 const loading = ref(false)
 const dialog = ref(false)
@@ -14,7 +16,7 @@ async function load() {
   try {
     albums.value = (await api.adminAlbums()) || []
   } catch (e) {
-    ElMessage.error(e.message || '加载失败')
+    ElMessage.error(e.message || t('common.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -31,15 +33,15 @@ function openEdit(row) {
 }
 
 async function submit() {
-  if (!form.albumName.trim()) { ElMessage.warning('请输入专辑名'); return }
+  if (!form.albumName.trim()) { ElMessage.warning(t('album.needName')); return }
   saving.value = true
   try {
     await api.adminAlbumSave({ id: form.id, albumName: form.albumName, isPublic: form.isPublic })
-    ElMessage.success('已保存')
+    ElMessage.success(t('common.saved'))
     dialog.value = false
     load()
   } catch (e) {
-    ElMessage.error(e.message || '保存失败')
+    ElMessage.error(e.message || t('common.saveFailed'))
   } finally {
     saving.value = false
   }
@@ -50,40 +52,40 @@ onMounted(load)
 
 <template>
   <div class="bar">
-    <h2 class="page-title">专辑</h2>
-    <el-button type="primary" @click="openCreate">新建专辑</el-button>
+    <h2 class="page-title">{{ $t('album.listTitle') }}</h2>
+    <el-button type="primary" @click="openCreate">{{ $t('album.create') }}</el-button>
   </div>
 
   <el-table :data="albums" v-loading="loading" border stripe>
-    <el-table-column prop="id" label="ID" width="80" />
-    <el-table-column prop="albumName" label="名称" min-width="180" />
-    <el-table-column label="文章数" width="100" prop="articleTotal" />
-    <el-table-column label="是否公开" width="100">
+    <el-table-column prop="id" :label="$t('common.id')" width="80" />
+    <el-table-column prop="albumName" :label="$t('common.name')" min-width="180" />
+    <el-table-column :label="$t('album.count')" width="100" prop="articleTotal" />
+    <el-table-column :label="$t('album.isPublic')" width="100">
       <template #default="{ row }">
         <el-tag :type="row.isPublic === 1 ? 'success' : 'info'" size="small">
-          {{ row.isPublic === 1 ? '公开' : '私有' }}
+          {{ row.isPublic === 1 ? $t('common.public') : $t('common.private') }}
         </el-tag>
       </template>
     </el-table-column>
-    <el-table-column label="操作" width="100">
+    <el-table-column :label="$t('common.operate')" width="100">
       <template #default="{ row }">
-        <el-button link type="primary" @click="openEdit(row)">编辑</el-button>
+        <el-button link type="primary" @click="openEdit(row)">{{ $t('common.edit') }}</el-button>
       </template>
     </el-table-column>
   </el-table>
 
-  <el-dialog v-model="dialog" :title="form.id ? '编辑专辑' : '新建专辑'" width="420px">
+  <el-dialog v-model="dialog" :title="form.id ? $t('album.editTitle') : $t('album.createTitle')" width="420px">
     <el-form label-width="80px">
-      <el-form-item label="名称">
+      <el-form-item :label="$t('common.name')">
         <el-input v-model="form.albumName" />
       </el-form-item>
-      <el-form-item label="公开">
+      <el-form-item :label="$t('common.public')">
         <el-switch v-model="form.isPublic" :active-value="1" :inactive-value="0" />
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button @click="dialog = false">取消</el-button>
-      <el-button type="primary" :loading="saving" @click="submit">保存</el-button>
+      <el-button @click="dialog = false">{{ $t('common.cancel') }}</el-button>
+      <el-button type="primary" :loading="saving" @click="submit">{{ $t('common.save') }}</el-button>
     </template>
   </el-dialog>
 </template>

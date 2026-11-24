@@ -17,15 +17,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <router-link to="/" class="back-link">&laquo; 返回首页</router-link>
-  <h2 style="margin:6px 0 18px">专辑</h2>
+  <router-link to="/" class="back-link">{{ $t('reader.backHome') }}</router-link>
+  <h2 style="margin:6px 0 18px">{{ $t('nav.albums') }}</h2>
 
-  <div v-if="loading" class="empty">加载中…</div>
+  <div v-if="loading" class="empty">{{ $t('common.loading') }}</div>
   <template v-else>
     <article v-for="al in albums" :key="al.id" class="post-card">
       <h2><router-link :to="`/album/${al.id}`">{{ al.albumName }}</router-link></h2>
-      <div class="post-meta">{{ al.articleTotal }} 篇文章</div>
+      <div class="post-meta">{{ $t('reader.articleCount', { n: al.articleTotal }) }}</div>
     </article>
-    <p v-if="!albums.length" class="empty">还没有公开的专辑。</p>
+    <p v-if="!albums.length" class="empty">{{ $t('reader.noAlbums') }}</p>
   </template>
 </template>

@@ -33,7 +33,7 @@ onMounted(() => load(Number(route.query.page) || 1))
 </script>
 
 <template>
-  <div v-if="loading" class="empty">加载中…</div>
+  <div v-if="loading" class="empty">{{ $t('common.loading') }}</div>
   <template v-else>
     <article v-for="a in articles" :key="a.id" class="post-card">
       <h2><router-link :to="`/article/${a.id}`">{{ a.title }}</router-link></h2>
@@ -43,12 +43,12 @@ onMounted(() => load(Number(route.query.page) || 1))
       <div v-if="a.brief" class="post-brief">{{ a.brief }}</div>
     </article>
 
-    <p v-if="!articles.length" class="empty">还没有已发布的文章。</p>
+    <p v-if="!articles.length" class="empty">{{ $t('reader.noArticles') }}</p>
 
     <nav v-if="page > 1 || articles.length === pageSize" class="pager">
-      <button class="btn" :disabled="page <= 1" @click="goPage(page - 1)">&laquo; 上一页</button>
-      <span class="muted">第 {{ page }} 页</span>
-      <button class="btn" :disabled="articles.length < pageSize" @click="goPage(page + 1)">下一页 &raquo;</button>
+      <button class="btn" :disabled="page <= 1" @click="goPage(page - 1)">{{ $t('reader.prevPage') }}</button>
+      <span class="muted">{{ $t('reader.pageN', { page }) }}</span>
+      <button class="btn" :disabled="articles.length < pageSize" @click="goPage(page + 1)">{{ $t('reader.nextPage') }}</button>
     </nav>
   </template>
 </template>

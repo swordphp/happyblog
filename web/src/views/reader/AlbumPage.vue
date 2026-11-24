@@ -29,10 +29,10 @@ onMounted(() => load(props.id))
 </script>
 
 <template>
-  <router-link to="/albums" class="back-link">&laquo; 全部专辑</router-link>
+  <router-link to="/albums" class="back-link">{{ $t('reader.allAlbums') }}</router-link>
 
-  <div v-if="loading" class="empty">加载中…</div>
-  <div v-else-if="notFound" class="empty">专辑不存在或未公开。</div>
+  <div v-if="loading" class="empty">{{ $t('common.loading') }}</div>
+  <div v-else-if="notFound" class="empty">{{ $t('reader.notFoundAlbum') }}</div>
 
   <template v-else>
     <h2 style="margin:6px 0 18px">{{ album.albumName }}</h2>
@@ -41,6 +41,6 @@ onMounted(() => load(props.id))
       <div class="post-meta">{{ a.authorInfo && a.authorInfo.nickName }} · {{ fmtDate(a.updateTime) }}</div>
       <div v-if="a.brief" class="post-brief">{{ a.brief }}</div>
     </article>
-    <p v-if="!articles.length" class="empty">该专辑下还没有已发布文章。</p>
+    <p v-if="!articles.length" class="empty">{{ $t('reader.noAlbumArticles') }}</p>
   </template>
 </template>

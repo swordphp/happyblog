@@ -27,16 +27,16 @@ onMounted(() => load(props.id))
 </script>
 
 <template>
-  <router-link to="/" class="back-link">&laquo; 返回首页</router-link>
-  <h2 style="margin:6px 0 18px">标签:{{ tagName || '#' + id }}</h2>
+  <router-link to="/" class="back-link">{{ $t('reader.backHome') }}</router-link>
+  <h2 style="margin:6px 0 18px">{{ $t('reader.tagTitle', { name: tagName || ('#' + id) }) }}</h2>
 
-  <div v-if="loading" class="empty">加载中…</div>
+  <div v-if="loading" class="empty">{{ $t('common.loading') }}</div>
   <template v-else>
     <article v-for="a in articles" :key="a.id" class="post-card">
       <h2><router-link :to="`/article/${a.id}`">{{ a.title }}</router-link></h2>
       <div class="post-meta">{{ a.authorInfo && a.authorInfo.nickName }} · {{ fmtDate(a.updateTime) }}</div>
       <div v-if="a.brief" class="post-brief">{{ a.brief }}</div>
     </article>
-    <p v-if="!articles.length" class="empty">该标签下还没有文章。</p>
+    <p v-if="!articles.length" class="empty">{{ $t('reader.noTagArticles') }}</p>
   </template>
 </template>

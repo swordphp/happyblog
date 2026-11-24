@@ -27,20 +27,20 @@ onMounted(async () => {
 })
 
 const cards = [
-  { key: 'articles', label: '文章', to: '/admin/articles' },
-  { key: 'tags', label: '标签', to: '/admin/tags' },
-  { key: 'albums', label: '专辑', to: '/admin/albums' },
-  { key: 'users', label: '用户', to: '/admin/users' },
+  { key: 'articles', i18n: 'dashboard.articles', to: '/admin/articles' },
+  { key: 'tags', i18n: 'dashboard.tags', to: '/admin/tags' },
+  { key: 'albums', i18n: 'dashboard.albums', to: '/admin/albums' },
+  { key: 'users', i18n: 'dashboard.users', to: '/admin/users' },
 ]
 </script>
 
 <template>
-  <h2 class="page-title">仪表盘</h2>
+  <h2 class="page-title">{{ $t('dashboard.title') }}</h2>
   <el-row :gutter="16" v-loading="loading">
     <el-col :span="6" v-for="c in cards" :key="c.key">
       <el-card shadow="hover" class="stat" @click="router.push(c.to)">
         <div class="num">{{ stats[c.key] }}</div>
-        <div class="label">{{ c.label }}</div>
+        <div class="label">{{ $t(c.i18n) }}</div>
       </el-card>
     </el-col>
   </el-row>

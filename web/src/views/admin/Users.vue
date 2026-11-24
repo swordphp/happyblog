@@ -1,9 +1,11 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import api from '@/api'
 import { fmtDate } from '@/utils/format'
 
+const { t } = useI18n()
 const users = ref([])
 const loading = ref(false)
 
@@ -12,7 +14,7 @@ onMounted(async () => {
   try {
     users.value = (await api.adminUsers()) || []
   } catch (e) {
-    ElMessage.error(e.message || '加载失败')
+    ElMessage.error(e.message || t('common.loadFailed'))
   } finally {
     loading.value = false
   }
@@ -20,11 +22,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h2 class="page-title">用户</h2>
+  <h2 class="page-title">{{ $t('user.title') }}</h2>
   <el-table :data="users" v-loading="loading" border stripe>
-    <el-table-column prop="nickName" label="昵称" min-width="140" />
-    <el-table-column prop="accountEmail" label="邮箱" min-width="200" />
-    <el-table-column label="注册时间" width="180">
+    <el-table-column prop="nickName" :label="$t('user.nickname')" min-width="140" />
+    <el-table-column prop="accountEmail" :label="$t('user.email')" min-width="200" />
+    <el-table-column :label="$t('user.registerTime')" width="180">
       <template #default="{ row }">{{ fmtDate(row.createTime, true) }}</template>
     </el-table-column>
   </el-table>

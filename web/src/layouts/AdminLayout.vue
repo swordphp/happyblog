@@ -1,20 +1,23 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { ElMessage } from 'element-plus'
 import { ArrowDown } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
+import LangSwitch from '@/components/LangSwitch.vue'
 
 const router = useRouter()
 const route = useRoute()
 const auth = useAuthStore()
+const { t } = useI18n()
 
 const activeMenu = computed(() => route.path)
-const nickName = computed(() => (auth.user && auth.user.nickName) || '管理员')
+const nickName = computed(() => (auth.user && auth.user.nickName) || t('admin.menu.dashboard'))
 
 async function onLogout() {
   await auth.logout()
-  ElMessage.success('已退出登录')
+  ElMessage.success(t('admin.loggedOut'))
   router.push({ name: 'admin-login' })
 }
 </script>
@@ -24,25 +27,26 @@ async function onLogout() {
     <el-aside width="210px" class="admin-aside">
       <div class="brand">HappyBlog</div>
       <el-menu :default-active="activeMenu" router unique-opened>
-        <el-menu-item index="/admin"><span>仪表盘</span></el-menu-item>
-        <el-menu-item index="/admin/articles"><span>文章</span></el-menu-item>
-        <el-menu-item index="/admin/tags"><span>标签</span></el-menu-item>
-        <el-menu-item index="/admin/albums"><span>专辑</span></el-menu-item>
-        <el-menu-item index="/admin/settings"><span>设置</span></el-menu-item>
-        <el-menu-item index="/admin/users"><span>用户</span></el-menu-item>
+        <el-menu-item index="/admin"><span>{{ $t('admin.menu.dashboard') }}</span></el-menu-item>
+        <el-menu-item index="/admin/articles"><span>{{ $t('admin.menu.articles') }}</span></el-menu-item>
+        <el-menu-item index="/admin/tags"><span>{{ $t('admin.menu.tags') }}</span></el-menu-item>
+        <el-menu-item index="/admin/albums"><span>{{ $t('admin.menu.albums') }}</span></el-menu-item>
+        <el-menu-item index="/admin/settings"><span>{{ $t('admin.menu.settings') }}</span></el-menu-item>
+        <el-menu-item index="/admin/users"><span>{{ $t('admin.menu.users') }}</span></el-menu-item>
       </el-menu>
     </el-aside>
 
     <el-container>
       <el-header class="admin-header">
-        <el-button text @click="router.push({ name: 'admin-article-new' })">+ 写文章</el-button>
+        <el-button text @click="router.push({ name: 'admin-article-new' })">{{ $t('admin.writeArticle') }}</el-button>
         <div class="spacer" />
-        <a href="/" target="_blank" class="view-site">查看站点 ↗</a>
+        <LangSwitch />
+        <a href="/" target="_blank" class="view-site">{{ $t('admin.viewSite') }}</a>
         <el-dropdown @command="(c) => c === 'logout' && onLogout()">
           <span class="user">{{ nickName }} <el-icon class="el-icon--right"><arrow-down /></el-icon></span>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+              <el-dropdown-item command="logout">{{ $t('admin.logout') }}</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
