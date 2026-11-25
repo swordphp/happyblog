@@ -9,7 +9,10 @@ RUN npm run build
 # ---- go build stage ----
 FROM golang:1.26-alpine AS builder
 WORKDIR /src
-ENV GOPROXY=https://goproxy.cn,direct
+# 默认用全球可达的官方代理(Fly/CI/各云构建器都能用);
+# 国内本地构建想提速:docker build --build-arg GOPROXY=https://goproxy.cn,direct .
+ARG GOPROXY=https://proxy.golang.org,direct
+ENV GOPROXY=${GOPROXY}
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
