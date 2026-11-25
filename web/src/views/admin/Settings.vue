@@ -12,7 +12,7 @@ const saving = ref(false)
 const form = reactive({ id: 0, ConfigGroup: '', ConfigName: '', ConfigValue: '', ConfigType: 'text', ConfigOrder: 0 })
 
 // 网站基础信息(存在配置文件里,独立于下方的配置项表)
-const siteForm = reactive({ sitename: '', sitedesc: '', siteurl: '' })
+const siteForm = reactive({ sitename: '', sitedesc: '', siteurl: '', github: '', githubshow: 0 })
 const siteSaving = ref(false)
 
 async function loadSite() {
@@ -21,6 +21,8 @@ async function loadSite() {
     siteForm.sitename = d.sitename || ''
     siteForm.sitedesc = d.sitedesc || ''
     siteForm.siteurl = d.siteurl || ''
+    siteForm.github = d.github || ''
+    siteForm.githubshow = d.githubshow === '1' || d.githubshow === 1 ? 1 : 0
   } catch (e) { /* 忽略 */ }
 }
 
@@ -118,6 +120,13 @@ onMounted(() => { loadSite(); load() })
       </el-form-item>
       <el-form-item :label="$t('setting.siteUrl')">
         <el-input v-model="siteForm.siteurl" :placeholder="$t('setting.siteUrlPh')" />
+      </el-form-item>
+      <el-form-item :label="$t('setting.github')">
+        <el-input v-model="siteForm.github" :placeholder="$t('setting.githubPh')" />
+      </el-form-item>
+      <el-form-item :label="$t('setting.githubShow')">
+        <el-switch v-model="siteForm.githubshow" :active-value="1" :inactive-value="0" />
+        <span class="muted" style="margin-left:10px">{{ $t('setting.githubShowHint') }}</span>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" :loading="siteSaving" @click="saveSite">{{ $t('common.save') }}</el-button>

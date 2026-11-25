@@ -6,6 +6,7 @@ import (
     "fmt"
     "io"
     "log"
+    "regexp"
     "strconv"
     "strings"
 
@@ -13,6 +14,9 @@ import (
     lib "happyblog/library"
     . "happyblog/models"
 )
+
+// htmlTagRe 用于从富文本正文中剥离 HTML 标签,生成纯文本简介
+var htmlTagRe = regexp.MustCompile(`<[^>]+>`)
 
 type AdminApiController struct {
     controller
@@ -181,14 +185,24 @@ func (ctrl AdminApiController) ArticleSave(c *gin.Context) {
 
     articleModel := new(Article)
     articleModel.Content = c.PostForm("content")
+    //内容格式:markdown(默认)或 html(富文本编辑器)
+    contentType := strings.ToLower(strings.TrimSpace(c.DefaultPostForm("contentType", "markdown")))
+    if contentType != "html" {
+        contentType = "markdown"
+    }
+    articleModel.ContentType = contentType
     articleModel.PubStatus = int8(pubStatus)
     articleModel.IndependPage = int8(independPage)
     articleModel.Title = c.DefaultPostForm("title", "no title")
     articleModel.Keywords = c.DefaultPostForm("keywords", "")
     articleModel.Brief = c.DefaultPostForm("describe", "")
     if articleModel.Brief == "" {
-        //简介为空时,截取正文前 200 字作为简介
-        articleModel.Brief = lib.MakeBrief(articleModel.Content, 200)
+        //简介为空时,截取正文前 200 字作为简介;富文本先去掉 HTML 标签
+        briefSrc := articleModel.Content
+        if contentType == "html" {
+            briefSrc = htmlTagRe.ReplaceAllString(briefSrc, "")
+        }
+        articleModel.Brief = lib.MakeBrief(briefSrc, 200)
     }
     articleModel.Headimage = c.DefaultPostForm("headimage", "")
     articleModel.Uri = c.DefaultPostForm("uri", "")

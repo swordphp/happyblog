@@ -1,10 +1,17 @@
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { useSiteStore } from '@/stores/site'
 import LangSwitch from '@/components/LangSwitch.vue'
 
 const site = useSiteStore()
 onMounted(() => site.load())
+
+// 允许后台填完整 URL,或只填 GitHub 账号(自动补全为 github.com/账号)
+const githubUrl = computed(() => {
+  const v = (site.github || '').trim()
+  if (!v) return ''
+  return /^https?:\/\//i.test(v) ? v : `https://github.com/${v.replace(/^@/, '')}`
+})
 </script>
 
 <template>
@@ -17,6 +24,7 @@ onMounted(() => site.load())
           <router-link to="/">{{ $t('nav.home') }}</router-link>
           <router-link to="/albums">{{ $t('nav.albums') }}</router-link>
           <a href="/api/rss" target="_blank" rel="noopener">{{ $t('nav.rss') }}</a>
+          <a v-if="githubUrl" :href="githubUrl" target="_blank" rel="noopener" class="gh-link" aria-label="GitHub">GitHub</a>
           <LangSwitch class="nav-lang" />
         </nav>
       </div>

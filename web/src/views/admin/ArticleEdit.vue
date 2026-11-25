@@ -3,7 +3,9 @@ import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { marked } from 'marked'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { QuillEditor } from '@vueup/vue-quill'
+import '@vueup/vue-quill/dist/vue-quill.snow.css'
 import api from '@/api'
 
 const props = defineProps({ id: { type: [String, Number], default: 0 } })
@@ -15,6 +17,18 @@ const loading = ref(false)
 const saving = ref(false)
 const tagsList = ref([])
 const albumsList = ref([])
+
+// 编辑方式:markdown(默认)或 rich(富文本,输出 HTML)
+const mode = ref('markdown')
+const quillRef = ref(null)
+const quillToolbar = [
+  [{ header: [1, 2, 3, false] }],
+  ['bold', 'italic', 'underline', 'strike'],
+  [{ list: 'ordered' }, { list: 'bullet' }],
+  ['blockquote', 'code-block'],
+  ['link'],
+  ['clean'],
+]
 
 const f = reactive({
   id: 0,
@@ -32,6 +46,22 @@ const f = reactive({
 
 const preview = computed(() => marked.parse(f.content || ''))
 
+// 切换编辑方式:Markdown ⇄ 富文本
+async function switchMode(target) {
+  if (target === mode.value) return
+  if (target === 'rich') {
+    // Markdown → 富文本:把 Markdown 渲染成 HTML 作为初始内容,避免丢失已写内容
+    f.content = marked.parse(f.content || '')
+    mode.value = 'rich'
+  } else {
+    // 富文本 → Markdown:HTML 会原样保留在文本框,提示用户确认
+    try {
+      await ElMessageBox.confirm(t('article.switchToMdWarn'), t('article.switchToMdTitle'), { type: 'warning' })
+    } catch (e) { return }
+    mode.value = 'markdown'
+  }
+}
+
 async function load() {
   loading.value = true
   try {
@@ -47,6 +77,7 @@ async function load() {
       f.headimage = info.headimage || ''
       f.pubStatus = info.pubStatus === 0 ? 0 : 1
       f.independPage = info.independPage === 1 ? 1 : 0
+      mode.value = info.contentType === 'html' ? 'rich' : 'markdown'
       f.albumId = data.relationAlbumId && data.relationAlbumId > 0 ? data.relationAlbumId : -1
       f.tagIds = (data.relationTagsIds ? String(data.relationTagsIds).split(',') : [])
         .map((x) => Number(x)).filter((x) => x > 0)
@@ -73,6 +104,7 @@ async function save(pubStatus) {
       title: f.title,
       uri: f.uri,
       content: f.content,
+      contentType: mode.value === 'rich' ? 'html' : 'markdown',
       describe: f.describe,
       keywords: f.keywords,
       headimage: f.headimage,
@@ -95,7 +127,14 @@ async function onUpload(ev) {
   if (!file) return
   try {
     const url = await api.upload(file, file.name)
-    f.content += `\n![${file.name}](${url})\n`
+    if (mode.value === 'rich' && quillRef.value) {
+      const quill = quillRef.value.getQuill()
+      const range = quill.getSelection(true)
+      quill.insertEmbed(range.index, 'image', url)
+      quill.setSelection(range.index + 1)
+    } else {
+      f.content += `\n![${file.name}](${url})\n`
+    }
     ElMessage.success(t('article.imageInserted'))
   } catch (e) {
     ElMessage.error(e.message || t('article.uploadFailed'))
@@ -126,16 +165,31 @@ onMounted(load)
 
     <el-form-item :label="$t('article.body')">
       <div class="md-toolbar">
+        <el-radio-group :model-value="mode" size="small" @change="switchMode">
+          <el-radio-button value="markdown">{{ $t('article.modeMarkdown') }}</el-radio-button>
+          <el-radio-button value="rich">{{ $t('article.modeRich') }}</el-radio-button>
+        </el-radio-group>
         <label class="upload-btn">
           {{ $t('article.insertImage') }}
           <input type="file" accept="image/*" hidden @change="onUpload" />
         </label>
-        <span class="muted">{{ $t('article.mdHint') }}</span>
+        <span v-if="mode === 'markdown'" class="muted">{{ $t('article.mdHint') }}</span>
       </div>
-      <div class="md-split">
+
+      <div v-if="mode === 'markdown'" class="md-split">
         <el-input v-model="f.content" type="textarea" :rows="18" resize="none" :placeholder="$t('article.mdPh')" />
         <div class="md-preview article-content" v-html="preview"></div>
       </div>
+      <QuillEditor
+        v-else
+        ref="quillRef"
+        v-model:content="f.content"
+        content-type="html"
+        theme="snow"
+        :toolbar="quillToolbar"
+        :placeholder="$t('article.richPh')"
+        class="rich-editor"
+      />
     </el-form-item>
 
     <el-form-item :label="$t('article.brief')">
@@ -174,5 +228,7 @@ onMounted(load)
 .md-split { display: flex; gap: 16px; width: 100%; }
 .md-split > * { flex: 1; min-width: 0; }
 .md-preview { border: 1px solid #e4e7ed; border-radius: 4px; padding: 10px 14px; overflow: auto; max-height: 420px; background: #fafafa; }
+.rich-editor { width: 100%; }
+.rich-editor :deep(.ql-editor) { min-height: 360px; font-size: 15px; }
 .muted { color: #999; font-size: 13px; }
 </style>

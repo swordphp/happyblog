@@ -12,9 +12,12 @@ const album = ref(null)
 const loading = ref(true)
 const notFound = ref(false)
 
-const contentHtml = computed(() =>
-  article.value ? marked.parse(article.value.content || '') : ''
-)
+const contentHtml = computed(() => {
+  if (!article.value) return ''
+  // 富文本文章正文已是 HTML,直接渲染;其余按 Markdown 处理
+  if (article.value.contentType === 'html') return article.value.content || ''
+  return marked.parse(article.value.content || '')
+})
 
 async function load(id) {
   loading.value = true

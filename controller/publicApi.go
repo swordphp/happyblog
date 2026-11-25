@@ -12,12 +12,18 @@ type PublicApi struct{}
 
 /**
  * SiteInfo 返回站点基本信息,供读者端 SPA 渲染页头与标题。
+ * github 仅在后台开启「展示」时才返回具体值,否则为空字符串。
  */
 func (PublicApi) SiteInfo(c *gin.Context) {
+    github := ""
+    if webConf["githubshow"] == "1" {
+        github = webConf["github"]
+    }
     respOK(c, gin.H{
         "sitename": webConf["sitename"],
         "sitedesc": webConf["sitedesc"],
         "siteurl":  webConf["siteurl"],
+        "github":   github,
     })
 }
 

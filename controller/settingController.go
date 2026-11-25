@@ -23,13 +23,15 @@ func (ctrl SettingController) Settings(c *gin.Context) {
 }
 
 /**
- * SiteConfigGet 返回站点基础信息(名称/简介/地址),供后台「设置」展示。
+ * SiteConfigGet 返回站点基础信息(名称/简介/地址/GitHub 链接),供后台「设置」展示。
  */
 func (ctrl SettingController) SiteConfigGet(c *gin.Context) {
     respOK(c, gin.H{
-        "sitename": webConf["sitename"],
-        "sitedesc": webConf["sitedesc"],
-        "siteurl":  webConf["siteurl"],
+        "sitename":   webConf["sitename"],
+        "sitedesc":   webConf["sitedesc"],
+        "siteurl":    webConf["siteurl"],
+        "github":     webConf["github"],
+        "githubshow": webConf["githubshow"],
     })
 }
 
@@ -42,7 +44,12 @@ func (ctrl SettingController) SiteConfigSave(c *gin.Context) {
         respFail(c, errCodeParam, "网站名称不能为空")
         return
     }
-    if err := lib.UpdateSiteConfig(sitename, c.PostForm("siteurl"), c.PostForm("sitedesc")); err != nil {
+    githubShow := "0"
+    if c.PostForm("githubshow") == "1" {
+        githubShow = "1"
+    }
+    if err := lib.UpdateSiteConfig(sitename, c.PostForm("siteurl"), c.PostForm("sitedesc"),
+        strings.TrimSpace(c.PostForm("github")), githubShow); err != nil {
         respFail(c, errCodeServer, "保存失败: "+err.Error())
         return
     }

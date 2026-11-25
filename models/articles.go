@@ -9,6 +9,7 @@ type Article struct{
     Id int `gorm:"primaryKey" json:"id"`
     Title string `gorm:"column:title" json:"title"`
     Content string `gorm:"column:content" json:"content,omitempty"`
+    ContentType string `gorm:"column:contentType;size:16" json:"contentType"` // markdown(默认/空) | html(富文本)
     PubStatus int8 `gorm:"column:pubStatus" json:"pubStatus,omitempty"`
     CreateTime time.Time `gorm:"column:createTime"   json:"createTime"`
     UpdateTime time.Time `gorm:"column:updateTime"  json:"updateTime"`

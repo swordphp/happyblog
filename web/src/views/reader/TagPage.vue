@@ -32,11 +32,11 @@ onMounted(() => load(props.id))
 
   <div v-if="loading" class="empty">{{ $t('common.loading') }}</div>
   <template v-else>
-    <article v-for="a in articles" :key="a.id" class="post-card">
-      <h2><router-link :to="`/article/${a.id}`">{{ a.title }}</router-link></h2>
+    <router-link v-for="a in articles" :key="a.id" class="post-card" :to="`/article/${a.id}`">
+      <h2>{{ a.title }}</h2>
       <div class="post-meta">{{ a.authorInfo && a.authorInfo.nickName }} · {{ fmtDate(a.updateTime) }}</div>
       <div v-if="a.brief" class="post-brief">{{ a.brief }}</div>
-    </article>
+    </router-link>
     <p v-if="!articles.length" class="empty">{{ $t('reader.noTagArticles') }}</p>
   </template>
 </template>

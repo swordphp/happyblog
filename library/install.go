@@ -102,6 +102,8 @@ func WriteWebConfig(f InstallForm) error {
         "sitename":      f.SiteName,
         "siteurl":       f.SiteURL,
         "sitedesc":      f.SiteDesc,
+        "github":        "",
+        "githubshow":    "0",
         "language":      "cn",
         "salt":          randomHex(16),
         "sessionsecret": randomHex(32),
@@ -159,10 +161,10 @@ func WriteWebConfig(f InstallForm) error {
 }
 
 /**
- * UpdateSiteConfig 仅更新站点基础信息(名称/地址/简介),保留配置其余部分
+ * UpdateSiteConfig 仅更新站点基础信息(名称/地址/简介/GitHub 链接),保留配置其余部分
  * (salt、sessionsecret、数据库、管理员等均不动)。供后台「设置」实时修改。
  */
-func UpdateSiteConfig(sitename, siteurl, sitedesc string) error {
+func UpdateSiteConfig(sitename, siteurl, sitedesc, github, githubShow string) error {
     data, err := os.ReadFile(ConfigFilePath())
     if err != nil {
         return err
@@ -174,6 +176,8 @@ func UpdateSiteConfig(sitename, siteurl, sitedesc string) error {
     cfg["sitename"] = sitename
     cfg["siteurl"] = siteurl
     cfg["sitedesc"] = sitedesc
+    cfg["github"] = github
+    cfg["githubshow"] = githubShow
     out, err := yaml.Marshal(cfg)
     if err != nil {
         return err

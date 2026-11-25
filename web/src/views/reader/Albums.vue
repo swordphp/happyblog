@@ -22,10 +22,10 @@ onMounted(async () => {
 
   <div v-if="loading" class="empty">{{ $t('common.loading') }}</div>
   <template v-else>
-    <article v-for="al in albums" :key="al.id" class="post-card">
-      <h2><router-link :to="`/album/${al.id}`">{{ al.albumName }}</router-link></h2>
+    <router-link v-for="al in albums" :key="al.id" class="post-card" :to="`/album/${al.id}`">
+      <h2>{{ al.albumName }}</h2>
       <div class="post-meta">{{ $t('reader.articleCount', { n: al.articleTotal }) }}</div>
-    </article>
+    </router-link>
     <p v-if="!albums.length" class="empty">{{ $t('reader.noAlbums') }}</p>
   </template>
 </template>
