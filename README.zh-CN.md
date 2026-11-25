@@ -68,6 +68,7 @@ make all               # 构建前端 + 编译二进制
   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swordphp/happyblog)
 
 - **Railway**:仓库自带 [`railway.json`](railway.json);记得加一个挂载到 `/data` 的 Volume。一键按钮需先在 Railway 后台发布模板(一次性),见 [deploy/](deploy/README.md)。
+- **Fly.io**:仓库自带 [`fly.toml`](fly.toml)。`fly launch --copy-config --no-deploy` → `fly volumes create happyblog_data` → `fly deploy`,详见 [deploy/](deploy/README.md)。
 
 端口默认 `:8888`,设置了 `PORT` 则用它(Render/Railway/Fly 会自动注入)。
 

@@ -68,6 +68,7 @@ make all               # build frontend + compile binary
   [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swordphp/happyblog)
 
 - **Railway:** the repo ships [`railway.json`](railway.json); add a volume mounted at `/data`. See [deploy/](deploy/README.md) (publishing the one-click template is a one-time dashboard step).
+- **Fly.io:** the repo ships [`fly.toml`](fly.toml). `fly launch --copy-config --no-deploy` → `fly volumes create happyblog_data` → `fly deploy`. See [deploy/](deploy/README.md).
 
 Port is `:8888` by default, or `$PORT` if set (Render/Railway/Fly inject it automatically).
 

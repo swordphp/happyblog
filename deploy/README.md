@@ -32,4 +32,18 @@ sudo systemctl daemon-reload && sudo systemctl enable --now happyblog
 - **加一个 Volume,挂载路径填 `/data`**(SQLite 库等数据持久化在这里)。
 - 端口走 Railway 注入的 `PORT`,程序已支持。
 
-> 说明:Render 的 `render.yaml`、Railway 的 `railway.json` 我已经配好;但**发布 Railway 模板**和**选 Render 付费档开持久盘**需要你用自己的账号在网页上点。这两步没法代劳。
+## 4. Fly.io
+
+仓库里有 [`fly.toml`](../fly.toml)(Dockerfile 构建 + 挂载卷 `/data`)。Fly 是命令行部署:
+
+```bash
+fly auth login
+fly launch --copy-config --no-deploy          # 用本仓库的 fly.toml;app 名被占用就改
+fly volumes create happyblog_data --region sin --size 1   # region 要和 fly.toml 的 primary_region 一致
+fly deploy
+fly open                                        # 打开后完成安装向导
+```
+
+数据持久化在挂载卷 `/data`;端口走 `fly.toml` 里的 `internal_port = 8888`。`fly.toml` 默认 `min_machines_running = 0`(闲时休眠、省额度),想避免冷启动改成 `1`。
+
+> 说明:Render 的 `render.yaml`、Railway 的 `railway.json`、Fly 的 `fly.toml` 我都配好了;但**发布 Railway 模板**、**选 Render 付费档开持久盘**、以及 **Fly 的 `fly launch` / 建卷**都需要你用自己的账号在命令行或网页上点,这些没法代劳。

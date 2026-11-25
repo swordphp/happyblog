@@ -1,0 +1,36 @@
+# Fly.io 部署配置 —— HappyBlog
+#
+# 首次部署:
+#   1. 安装 flyctl 并登录:  fly auth login
+#   2. 在仓库根目录:         fly launch --copy-config --no-deploy
+#        (会用本文件;若提示 app 名已被占用,改下面的 app = 或让它自动生成)
+#   3. 建持久卷(存 SQLite/配置/上传/日志,region 要和下面 primary_region 一致):
+#        fly volumes create happyblog_data --region sin --size 1
+#   4. 部署:                 fly deploy
+#   5. 打开:                 fly open  → 完成安装向导
+#
+# 数据都落在挂载卷 /data;程序监听 8888(下方 PORT / internal_port 已对齐)。
+
+app = "happyblog"                 # 全局唯一,被占用就改个名
+primary_region = "sin"            # 香港 hkg / 新加坡 sin / 东京 nrt,按需改
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8888"
+
+[processes]
+  app = "/bin/sh -c 'cd /data && exec /app/happyblog'"
+
+[http_service]
+  internal_port = 8888
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0        # 想避免冷启动改成 1
+  processes = ["app"]
+
+[mounts]
+  source = "happyblog_data"
+  destination = "/data"
