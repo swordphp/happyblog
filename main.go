@@ -2,6 +2,7 @@ package main
 
 import (
     "log"
+    "os"
 
     "github.com/gin-gonic/gin"
     "happyblog/controller"
@@ -29,5 +30,10 @@ func main() {
     router.ApiRouter(r)           //读者端公开接口 /api
     router.SpaRouter(r, distFS)   //前端 SPA(读者端+管理端),放在最后兜底
 
-    r.Run(":8888")
+    //监听端口:默认 8888;PaaS(Railway/Render/Fly 等)会注入 PORT 环境变量
+    addr := ":8888"
+    if p := os.Getenv("PORT"); p != "" {
+        addr = ":" + p
+    }
+    r.Run(addr)
 }

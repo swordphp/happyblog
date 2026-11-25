@@ -1,0 +1,21 @@
+# Render Blueprint —— 一键部署 HappyBlog
+# 用法:点 README 里的 "Deploy to Render" 按钮,或在 Render 新建 Blueprint 指向本仓库。
+#
+# 说明:
+# - 用 Dockerfile 构建;容器以 /data 为工作目录,SQLite 库/配置/上传/日志都落在挂载盘上。
+# - 持久盘(disk)需要付费实例(starter 及以上);free 实例不支持磁盘,重新部署后数据会丢(仅适合试用)。
+# - 端口由 Render 注入的 $PORT 决定(程序已支持 PORT 环境变量)。
+
+services:
+  - type: web
+    name: happyblog
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    dockerCommand: /bin/sh -c "cd /data && exec /app/happyblog"
+    plan: starter
+    healthCheckPath: /
+    disk:
+      name: happyblog-data
+      mountPath: /data
+      sizeGB: 1

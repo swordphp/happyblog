@@ -60,6 +60,17 @@ make all               # build frontend + compile binary
 ./happyblog
 ```
 
+## Deploy
+
+- **Your own VPS (systemd):** copy the binary, drop in [`deploy/happyblog.service`](deploy/happyblog.service), `systemctl enable --now happyblog`. Full steps in [deploy/](deploy/README.md).
+- **Render:** one click — the repo ships a [`render.yaml`](render.yaml) blueprint. Persistent data needs a paid (starter+) instance; free is fine for a trial.
+
+  [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swordphp/happyblog)
+
+- **Railway:** the repo ships [`railway.json`](railway.json); add a volume mounted at `/data`. See [deploy/](deploy/README.md) (publishing the one-click template is a one-time dashboard step).
+
+Port is `:8888` by default, or `$PORT` if set (Render/Railway/Fly inject it automatically).
+
 ## Features
 
 - Articles with Markdown **or** rich-text (Quill) editing, drafts, standalone pages, slugs, SEO fields

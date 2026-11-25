@@ -1,0 +1,40 @@
+# HappyBlog systemd 服务示例 / systemd unit example
+#
+# 安装步骤 / Setup:
+#   1. 建用户和目录:
+#        sudo useradd --system --home /opt/happyblog --shell /usr/sbin/nologin happyblog
+#        sudo mkdir -p /opt/happyblog
+#   2. 放二进制(从 Releases 下载对应平台的包解压):
+#        sudo cp happyblog /opt/happyblog/
+#        sudo chown -R happyblog:happyblog /opt/happyblog
+#   3. 装服务:
+#        sudo cp deploy/happyblog.service /etc/systemd/system/
+#        sudo systemctl daemon-reload
+#        sudo systemctl enable --now happyblog
+#   4. 浏览器打开 http://<服务器IP>:8888 完成安装向导。
+#   数据(SQLite 库、configs、assets、log)都落在 WorkingDirectory=/opt/happyblog。
+#   生产环境建议前面再挂一层 Nginx/Caddy 反代并配 HTTPS。
+
+[Unit]
+Description=HappyBlog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=happyblog
+Group=happyblog
+WorkingDirectory=/opt/happyblog
+ExecStart=/opt/happyblog/happyblog
+Restart=on-failure
+RestartSec=5
+# 自定义端口(可选):Environment=PORT=9000
+
+# 加固 / hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ReadWritePaths=/opt/happyblog
+
+[Install]
+WantedBy=multi-user.target

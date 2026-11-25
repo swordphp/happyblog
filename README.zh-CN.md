@@ -60,6 +60,17 @@ make all               # 构建前端 + 编译二进制
 ./happyblog
 ```
 
+## 部署
+
+- **自己的 VPS(systemd)**:拷贝二进制,放入 [`deploy/happyblog.service`](deploy/happyblog.service),`systemctl enable --now happyblog`。完整步骤见 [deploy/](deploy/README.md)。
+- **Render**:一键部署,仓库自带 [`render.yaml`](render.yaml)。数据持久化需付费档(starter+),free 档适合试跑。
+
+  [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/swordphp/happyblog)
+
+- **Railway**:仓库自带 [`railway.json`](railway.json);记得加一个挂载到 `/data` 的 Volume。一键按钮需先在 Railway 后台发布模板(一次性),见 [deploy/](deploy/README.md)。
+
+端口默认 `:8888`,设置了 `PORT` 则用它(Render/Railway/Fly 会自动注入)。
+
 ## 功能
 
 - 文章支持 Markdown **或**富文本(Quill)编辑,草稿、独立页面、别名、SEO 字段
