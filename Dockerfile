@@ -1,5 +1,5 @@
 # ---- frontend build stage (Vite + Vue) ----
-FROM node:20-alpine AS web
+FROM node:22-alpine AS web
 WORKDIR /web
 COPY web/package.json ./
 RUN npm install
@@ -7,7 +7,7 @@ COPY web/ ./
 RUN npm run build
 
 # ---- go build stage ----
-FROM golang:1.25-alpine AS builder
+FROM golang:1.26-alpine AS builder
 WORKDIR /src
 ENV GOPROXY=https://goproxy.cn,direct
 COPY go.mod go.sum ./

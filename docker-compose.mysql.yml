@@ -1,0 +1,36 @@
+# HappyBlog —— MySQL / MariaDB 变体
+#   docker compose -f docker-compose.mysql.yml up -d --build
+#   浏览器打开 http://localhost:8888,安装向导里数据库类型选 MySQL,填:
+#     主机 db、端口 3306、库名 happyblog、用户 root、密码 happyblog
+#
+# 表由程序自动迁移创建,无需手动导入建表语句。
+
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: happyblog
+      MARIADB_DATABASE: happyblog
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    image: ghcr.io/swordphp/happyblog:latest
+    # 本地源码构建改用: build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /app/data
+    ports:
+      - "8888:8888"
+    volumes:
+      - happyblog_data:/app/data
+
+volumes:
+  dbdata:
+  happyblog_data:

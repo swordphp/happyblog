@@ -1,34 +1,21 @@
-version: "3.8"
+# HappyBlog —— SQLite 单文件一键启动(默认,最简单)
+#   docker compose up -d   然后浏览器打开 http://localhost:8888 完成安装向导
+#
+# 所有数据(SQLite 库、配置、上传图片、日志)都落在 /app/data,由下方命名卷持久化。
+# 想用 MySQL/MariaDB 见 docker-compose.mysql.yml。
 
 services:
-  db:
-    image: mariadb:10.5
-    environment:
-      MYSQL_ROOT_PASSWORD: happyblog
-      MYSQL_DATABASE: happyblog
-    ports:
-      - "3306:3306"
-    volumes:
-      - dbdata:/var/lib/mysql
-      # 首次启动自动导入建表语句
-      - ./createTable.sql:/docker-entrypoint-initdb.d/createTable.sql:ro
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
   app:
-    build: .
-    depends_on:
-      db:
-        condition: service_healthy
+    # 已发布镜像(由 .github/workflows/docker.yml 推送到 GHCR)
+    image: ghcr.io/swordphp/happyblog:latest
+    # 如需本地源码构建,注释掉上面的 image,改用:
+    # build: .
+    working_dir: /app/data        # 库/配置/上传/日志统一落在此目录,便于持久化
     ports:
       - "8888:8888"
     volumes:
-      # 挂载本地配置,方便修改(需先从 template 复制一份 webconfig.yaml)
-      - ./configs:/app/configs
-      - ./log:/app/log
+      - happyblog_data:/app/data
+    restart: unless-stopped
 
 volumes:
-  dbdata:
+  happyblog_data:
