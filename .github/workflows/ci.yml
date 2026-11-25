@@ -12,12 +12,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - name: Build web (Vite + Vue)
         run: cd web && npm install && npm run build
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.26'
       - name: Prepare config
         run: cp configs/webconfig.yaml.template configs/webconfig.yaml
       - name: Vet
