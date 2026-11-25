@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Build web (Vite + Vue)
+        run: cd web && npm install && npm run build
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.25'
+
+      - name: Cross compile single binaries
+        run: |
+          set -e
+          VERSION="${GITHUB_REF_NAME}"
+          mkdir -p dist pkg
+          build() {
+            goos=$1; goarch=$2; ext=$3
+            echo "==> building ${goos}/${goarch}"
+            CGO_ENABLED=0 GOOS=$goos GOARCH=$goarch \
+              go build -trimpath -ldflags "-s -w" -o "happyblog${ext}" .
+            name="happyblog_${VERSION}_${goos}_${goarch}"
+            mkdir -p "pkg/${name}"
+            cp "happyblog${ext}" "pkg/${name}/"
+            cp README.md "pkg/${name}/" 2>/dev/null || true
+            cp configs/webconfig.yaml.template "pkg/${name}/" 2>/dev/null || true
+            if [ "$goos" = "windows" ]; then
+              (cd pkg && zip -qr "../dist/${name}.zip" "${name}")
+            else
+              tar -czf "dist/${name}.tar.gz" -C pkg "${name}"
+            fi
+            rm -f "happyblog${ext}"
+          }
+          build linux   amd64 ""
+          build linux   arm64 ""
+          build windows amd64 ".exe"
+          build darwin  amd64 ""
+          build darwin  arm64 ""
+          ls -lh dist
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true
