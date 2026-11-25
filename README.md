@@ -6,8 +6,9 @@
 
 No external database, no CGO, no config files to hand-edit. SQLite by default (MySQL/MariaDB optional), with the reader site and admin panel (Vue 3 + Element Plus) embedded right into the binary.
 
-English · [中文](README.zh-CN.md)
+English · [中文](README.zh-CN.md) · **[Live demo ↗](https://happyblog.fly.dev)**
 
+[![live demo](https://img.shields.io/badge/live_demo-happyblog.fly.dev-7c3aed?logo=fly.io&logoColor=white)](https://happyblog.fly.dev)
 [![release](https://img.shields.io/github/v/release/swordphp/happyblog?sort=semver)](https://github.com/swordphp/happyblog/releases)
 [![CI](https://github.com/swordphp/happyblog/actions/workflows/ci.yml/badge.svg)](https://github.com/swordphp/happyblog/actions/workflows/ci.yml)
 [![license](https://img.shields.io/github/license/swordphp/happyblog)](LICENSE)

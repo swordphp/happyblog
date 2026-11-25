@@ -6,8 +6,9 @@
 
 无需外置数据库、无需 CGO、无需手写配置。默认用 SQLite(可选 MySQL/MariaDB),读者端与后台管理(Vue 3 + Element Plus)全部 `go:embed` 内嵌进二进制。
 
-[English](README.md) · 中文
+[English](README.md) · 中文 · **[在线 Demo ↗](https://happyblog.fly.dev)**
 
+[![live demo](https://img.shields.io/badge/live_demo-happyblog.fly.dev-7c3aed?logo=fly.io&logoColor=white)](https://happyblog.fly.dev)
 [![release](https://img.shields.io/github/v/release/swordphp/happyblog?sort=semver)](https://github.com/swordphp/happyblog/releases)
 [![CI](https://github.com/swordphp/happyblog/actions/workflows/ci.yml/badge.svg)](https://github.com/swordphp/happyblog/actions/workflows/ci.yml)
 [![license](https://img.shields.io/github/license/swordphp/happyblog)](LICENSE)
